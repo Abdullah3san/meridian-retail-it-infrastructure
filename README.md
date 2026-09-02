@@ -10,6 +10,14 @@ This repo is a **design document + reference implementation**, not a live produc
 
 ---
 
+## Infrastructure map
+
+![Meridian Retail Group infrastructure map — HQ with a Proxmox server cluster and firewall connecting over a WireGuard VPN mesh to Branch North and Branch South, each with a firewall, switch, POS terminals, staff PCs, WiFi, and CCTV](diagrams/assets/infrastructure-map.svg)
+
+One-page view of all 3 sites — devices, VLANs, and the VPN mesh together. The [logical software map](diagrams/logical-architecture.md) and [security zones map](diagrams/dataflow-security-zones.md) below go deeper on the application and trust-boundary layers this map doesn't show.
+
+---
+
 ## Why this exists
 
 Most "homelab" portfolios show one server running one app. Real SMB environments are a system: a WAN edge, segmented VLANs, a domain, centralized identity, a backup chain with a real RPO/RTO, and a dozen business-critical apps that all have to talk to each other securely across three sites. This project designs that whole system for a realistic small business, end to end.
@@ -47,6 +55,7 @@ Most "homelab" portfolios show one server running one app. Real SMB environments
 
 ## Diagrams
 
+- [**Infrastructure Map**](diagrams/assets/infrastructure-map.svg) — poster-style, single-page view of every site, device, VLAN, and the VPN mesh (shown above)
 - [Network Topology](diagrams/network-topology.md) — all 3 sites, WAN edges, VPN mesh, core devices
 - [VLAN Segmentation](diagrams/vlan-segmentation.md) — per-site VLAN layout and inter-VLAN policy
 - [Logical Software Architecture](diagrams/logical-architecture.md) — every service and how users reach it

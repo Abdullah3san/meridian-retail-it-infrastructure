@@ -1,6 +1,6 @@
 # Network Topology
 
-Full design context: [01 — Network Architecture](../docs/01-network-architecture.md)
+Full design context: [01 — Network Architecture](../docs/01-network-architecture.md) · See also the single-page [Infrastructure Map](assets/infrastructure-map.svg) for a poster-style view of all 3 sites together.
 
 ## All 3 sites, WAN edges, and the VPN mesh
 
