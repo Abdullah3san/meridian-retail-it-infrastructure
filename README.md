@@ -18,6 +18,47 @@ One-page view of all 3 sites — devices, VLANs, and the VPN mesh together. The 
 
 ---
 
+## Skills demonstrated
+
+Every row below is backed by a real doc or config in this repo, not just claimed — click through to see the actual work.
+
+**Networking & Security**
+
+| Skill | Where |
+|---|---|
+| Network segmentation & VLAN design | [01 — Network Architecture](docs/01-network-architecture.md), [VLAN Segmentation](diagrams/vlan-segmentation.md) |
+| Firewall policy design (default-deny, least privilege) | [`firewall-rules-hq.md`](configs/pfsense/firewall-rules-hq.md) |
+| Site-to-site VPN (WireGuard, hub-and-spoke) | [`wireguard-site-to-site.conf.sample`](configs/pfsense/wireguard-site-to-site.conf.sample) |
+| IP addressing & subnetting at multi-site scale | [01 — Network Architecture](docs/01-network-architecture.md#ip-addressing-plan) |
+| PCI-DSS-aware network design (POS isolation) | [05 — Security Architecture](docs/05-security-architecture.md#vlan-to-vlan-policy) |
+| SIEM / EDR / log correlation (Wazuh) | [05 — Security Architecture](docs/05-security-architecture.md#siem--edr-wazuh), [`wazuh-note.md`](configs/docker-compose/wazuh-note.md) |
+| Switch VLAN/trunk configuration | [`vlan-config-sample.txt`](configs/switch/vlan-config-sample.txt) |
+
+**Systems, Virtualization & Identity**
+
+| Skill | Where |
+|---|---|
+| Virtualization & clustering (Proxmox VE) | [02 — Server Infrastructure](docs/02-server-infrastructure.md) |
+| Directory services (Active Directory via Samba 4) | [03 — Identity & Access](docs/03-identity-and-access.md#directory-samba-4-active-directory) |
+| SSO / MFA architecture (Authelia) | [03 — Identity & Access](docs/03-identity-and-access.md#single-sign-on-authelia) |
+| Identity lifecycle management (joiner/mover/leaver) | [03 — Identity & Access](docs/03-identity-and-access.md#joiner--mover--leaver-process) |
+| Linux systems administration & containerization | [`configs/docker-compose/`](configs/docker-compose/) |
+| DHCP/DNS architecture | [01 — Network Architecture](docs/01-network-architecture.md#dhcp--dns), [`kea-dhcp4.conf.sample`](configs/dhcp/kea-dhcp4.conf.sample) |
+
+**Business Systems, Operations & Planning**
+
+| Skill | Where |
+|---|---|
+| ERP/business-systems integration (accounting, inventory, POS, HR, CRM) | [04 — Software Stack](docs/04-software-stack.md#erpnext--the-core-of-the-business) |
+| Infrastructure monitoring & alerting (Zabbix + Grafana) | [06 — Monitoring & Observability](docs/06-monitoring-observability.md) |
+| Disaster recovery planning (RTO/RPO, runbooks) | [07 — Disaster Recovery](docs/07-disaster-recovery.md) |
+| Backup architecture (3-2-1, tested restores) | [07 — Disaster Recovery](docs/07-disaster-recovery.md#the-3-2-1-chain), [Backup & DR Flow](diagrams/backup-dr-flow.md) |
+| IT policy writing (AUP, password/MFA, retention) | [`policies/`](policies/) |
+| Cost/TCO analysis & build-vs-buy reasoning | [08 — Cost & BOM](docs/08-cost-and-bom.md) |
+| Technical documentation & systems diagramming | this repo, in full |
+
+---
+
 ## Why this exists
 
 Most "homelab" portfolios show one server running one app. Real SMB environments are a system: a WAN edge, segmented VLANs, a domain, centralized identity, a backup chain with a real RPO/RTO, and a dozen business-critical apps that all have to talk to each other securely across three sites. This project designs that whole system for a realistic small business, end to end.
