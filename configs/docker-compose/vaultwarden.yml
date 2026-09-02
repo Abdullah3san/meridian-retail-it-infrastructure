@@ -1,0 +1,42 @@
+# Vaultwarden stack — vault01
+# Design context: docs/03-identity-and-access.md (Password & secrets management)
+
+version: "3.8"
+
+services:
+  vaultwarden:
+    image: vaultwarden/server:1.32.0-alpine
+    restart: unless-stopped
+    environment:
+      DOMAIN: "https://vault.meridianretail.local"
+      SIGNUPS_ALLOWED: "false"        # Admin invites only — no open self-registration
+      INVITATIONS_ALLOWED: "true"
+      WEBSOCKET_ENABLED: "true"
+      ADMIN_TOKEN: ${VW_ADMIN_TOKEN}  # Long random token — store this itself in the "IT Admin" collection, docs/03
+      SMTP_HOST: mail01.meridianretail.local
+      SMTP_FROM: vault@meridianretail.local
+      SMTP_PORT: "587"
+      SMTP_SECURITY: starttls
+      SMTP_USERNAME: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+    ports:
+      - "127.0.0.1:8082:80"   # Fronted by internal reverse proxy, MFA enforced at Authelia — docs/03
+    volumes:
+      - vw-data:/data
+    networks: [vaultwarden]
+
+networks:
+  vaultwarden:
+    driver: bridge
+
+volumes:
+  vw-data:
+
+# .env:
+#   VW_ADMIN_TOKEN=change-me-to-a-long-random-string
+#   SMTP_USER=vault@meridianretail.local
+#   SMTP_PASSWORD=change-me
+#
+# Note: vw-data contains every credential the org stores — this is one of
+# the highest-priority volumes in the entire backup chain (docs/07). It's
+# backed up on the "critical" 4-hour tier alongside dc01/dc02/erp01.

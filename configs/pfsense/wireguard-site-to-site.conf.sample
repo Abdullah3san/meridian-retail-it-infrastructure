@@ -1,0 +1,77 @@
+# WireGuard Site-to-Site — Sample Config
+#
+# Design context: docs/01-network-architecture.md (Site-to-site VPN section)
+# Topology: hub-and-spoke, HQ is the hub, Branch North / South are spokes.
+#
+# All keys below are PLACEHOLDERS — generate real keypairs per host with:
+#   wg genkey | tee privatekey | wg pubkey > publickey
+# Never commit real private keys to a repo. In pfSense this is configured via
+# VPN > WireGuard in the GUI; the .conf syntax below is the vendor-neutral
+# equivalent for anyone applying this to plain wg-quick / another platform.
+
+# ============================================================
+# fw-hq.conf  (the HUB — HQ pfSense)
+# ============================================================
+[Interface]
+# Tunnel address for HQ's own end of the mesh
+Address    = 10.99.0.1/24
+ListenPort = 51820
+PrivateKey = <HQ_PRIVATE_KEY_PLACEHOLDER>
+
+[Peer]
+# Branch North
+PublicKey           = <BRANCH_NORTH_PUBLIC_KEY_PLACEHOLDER>
+AllowedIPs          = 10.99.0.2/32, 10.20.0.0/16
+PersistentKeepalive = 25
+
+[Peer]
+# Branch South
+PublicKey           = <BRANCH_SOUTH_PUBLIC_KEY_PLACEHOLDER>
+AllowedIPs          = 10.99.0.3/32, 10.30.0.0/16
+PersistentKeepalive = 25
+
+# ============================================================
+# fw-north.conf  (SPOKE — Branch North pfSense)
+# ============================================================
+[Interface]
+Address    = 10.99.0.2/24
+ListenPort = 51820
+PrivateKey = <BRANCH_NORTH_PRIVATE_KEY_PLACEHOLDER>
+
+[Peer]
+# HQ (hub) — branch only ever talks to HQ, never directly to the other branch
+PublicKey           = <HQ_PUBLIC_KEY_PLACEHOLDER>
+Endpoint            = <HQ_PUBLIC_IP_OR_DDNS>:51820
+AllowedIPs          = 10.99.0.0/24, 10.10.0.0/16
+PersistentKeepalive = 25
+
+# ============================================================
+# fw-south.conf  (SPOKE — Branch South pfSense)
+# ============================================================
+[Interface]
+Address    = 10.99.0.3/24
+ListenPort = 51820
+PrivateKey = <BRANCH_SOUTH_PRIVATE_KEY_PLACEHOLDER>
+
+[Peer]
+PublicKey           = <HQ_PUBLIC_KEY_PLACEHOLDER>
+Endpoint            = <HQ_PUBLIC_IP_OR_DDNS>:51820
+AllowedIPs          = 10.99.0.0/24, 10.10.0.0/16
+PersistentKeepalive = 25
+
+# ============================================================
+# Notes
+# ============================================================
+# - 10.99.0.0/24 is the WireGuard tunnel-interface network itself (not a
+#   VLAN in docs/01) — just the point-to-point addressing between the three
+#   firewalls' VPN interfaces.
+# - AllowedIPs on the hub is the UNION of what each spoke should be able to
+#   reach; on each spoke it's just "the hub's tunnel IP + HQ's full /16" —
+#   the hub then decides via firewall rules (see
+#   configs/pfsense/firewall-rules-hq.md) what's actually permitted, not
+#   the tunnel's AllowedIPs. Reachable != permitted, by design.
+# - Branch-to-branch traffic is intentionally impossible: neither branch's
+#   AllowedIPs includes the other branch's subnet, so there is no route
+#   between them even before firewall rules are considered.
+# - PersistentKeepalive 25s keeps NAT mappings open on both ends since
+#   branch firewalls typically sit behind consumer-grade ISP NAT/CGNAT.

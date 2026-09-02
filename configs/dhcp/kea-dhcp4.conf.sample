@@ -1,0 +1,113 @@
+{
+  "_comment": "Kea DHCPv4 sample — HQ site. Design context: docs/01-network-architecture.md (DHCP & DNS section). pfSense's built-in DHCP server is Kea-based as of pfSense 2.7+, so this is close to a real exportable subnet block for the Servers/Staff/etc. VLANs at HQ. Adapt per branch using that site's /16 base (docs/01).",
+
+  "Dhcp4": {
+    "interfaces-config": {
+      "interfaces": [ "igb1.10", "igb1.20", "igb1.30", "igb1.40", "igb1.50", "igb1.60", "igb1.70" ]
+    },
+    "lease-database": {
+      "type": "memfile",
+      "persist": true,
+      "name": "/var/db/kea/dhcp4-hq.leases"
+    },
+    "valid-lifetime": 86400,
+    "renew-timer": 43200,
+    "rebind-timer": 75600,
+
+    "subnet4": [
+      {
+        "id": 10,
+        "subnet": "10.10.10.0/24",
+        "pools": [ { "pool": "10.10.10.100 - 10.10.10.200" } ],
+        "option-data": [
+          { "name": "routers", "data": "10.10.10.1" },
+          { "name": "domain-name-servers", "data": "10.10.10.1" }
+        ],
+        "_comment": "VLAN 10 — Management. Small pool: mostly static reservations for switches/APs/IPMI."
+      },
+      {
+        "id": 20,
+        "subnet": "10.10.20.0/24",
+        "pools": [],
+        "option-data": [
+          { "name": "routers", "data": "10.10.20.1" },
+          { "name": "domain-name-servers", "data": "10.10.20.11" }
+        ],
+        "_comment": "VLAN 20 — Servers. No dynamic pool: every VM gets a static reservation (see reservations below), matching the hostnames in docs/02-server-infrastructure.md."
+      },
+      {
+        "id": 30,
+        "subnet": "10.10.30.0/24",
+        "pools": [ { "pool": "10.10.30.50 - 10.10.30.250" } ],
+        "option-data": [
+          { "name": "routers", "data": "10.10.30.1" },
+          { "name": "domain-name-servers", "data": "10.10.20.11" },
+          { "name": "domain-name", "data": "meridianretail.local" }
+        ],
+        "_comment": "VLAN 30 — Staff workstations. Dynamic pool, DNS points at dc01 (AD-integrated DNS, docs/03)."
+      },
+      {
+        "id": 40,
+        "subnet": "10.10.40.0/24",
+        "pools": [ { "pool": "10.10.40.50 - 10.10.40.200" } ],
+        "option-data": [
+          { "name": "routers", "data": "10.10.40.1" },
+          { "name": "domain-name-servers", "data": "10.10.20.11" }
+        ]
+      },
+      {
+        "id": 50,
+        "subnet": "10.10.50.0/24",
+        "pools": [ { "pool": "10.10.50.50 - 10.10.50.200" } ],
+        "option-data": [
+          { "name": "routers", "data": "10.10.50.1" },
+          { "name": "tftp-server-name", "data": "10.10.20.19" }
+        ],
+        "_comment": "VLAN 50 — VoIP. tftp-server-name points phones at voip01 (FreePBX) for auto-provisioning."
+      },
+      {
+        "id": 60,
+        "subnet": "10.10.60.0/24",
+        "pools": [ { "pool": "10.10.60.10 - 10.10.60.250" } ],
+        "option-data": [
+          { "name": "routers", "data": "10.10.60.1" },
+          { "name": "domain-name-servers", "data": "9.9.9.9, 1.1.1.1" }
+        ],
+        "_comment": "VLAN 60 — Guest WiFi. Public DNS, NOT the internal AD DNS — guests never resolve or reach internal hostnames."
+      },
+      {
+        "id": 70,
+        "subnet": "10.10.70.0/24",
+        "pools": [ { "pool": "10.10.70.50 - 10.10.70.200" } ],
+        "option-data": [
+          { "name": "routers", "data": "10.10.70.1" },
+          { "name": "domain-name-servers", "data": "10.10.70.1" }
+        ],
+        "_comment": "VLAN 70 — CCTV/IoT. Local resolver only; this VLAN has no route to the internet or AD (docs/05)."
+      }
+    ],
+
+    "reservations": [
+      {
+        "hw-address": "aa:bb:cc:00:20:01",
+        "ip-address": "10.10.20.11",
+        "hostname": "dc01"
+      },
+      {
+        "hw-address": "aa:bb:cc:00:20:02",
+        "ip-address": "10.10.20.12",
+        "hostname": "dc02"
+      },
+      {
+        "hw-address": "aa:bb:cc:00:20:03",
+        "ip-address": "10.10.20.13",
+        "hostname": "erp01"
+      },
+      {
+        "hw-address": "aa:bb:cc:00:20:14",
+        "ip-address": "10.10.20.24",
+        "hostname": "pbs01"
+      }
+    ]
+  }
+}

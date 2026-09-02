@@ -1,0 +1,119 @@
+! ============================================================
+! Managed Switch VLAN Configuration — Sample (HQ Access Switch)
+! Design context: docs/01-network-architecture.md (LAN switching section)
+!
+! Written in generic Cisco-IOS-style syntax as the most widely readable
+! reference dialect. Vendor-agnostic by design — see docs/01 for why
+! (no lock-in to one switch manufacturer). Translate to your actual
+! platform's CLI/webUI (HP/Aruba, MikroTik, Ubiquiti, etc.) as needed.
+! ============================================================
+
+! --- VLAN definitions ---
+vlan 10
+ name MGMT
+vlan 20
+ name SERVERS
+vlan 30
+ name STAFF
+vlan 40
+ name WHOPS
+vlan 50
+ name VOIP
+vlan 60
+ name GUEST
+vlan 70
+ name CCTV
+vlan 99
+ name NATIVE_UNUSED
+!
+
+! --- Uplink to firewall (trunk, carries every in-use VLAN, native = 99) ---
+interface GigabitEthernet1/0/1
+ description UPLINK-TO-fw-hq
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40,50,60,70
+ switchport trunk native vlan 99
+!
+
+! --- Uplink to Proxmox host (trunk — VM traffic needs VLAN 20, cluster mgmt needs VLAN 10) ---
+interface GigabitEthernet1/0/2
+ description UPLINK-TO-proxmox-node1
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20
+ switchport trunk native vlan 99
+ channel-group 1 mode active
+!
+interface GigabitEthernet1/0/3
+ description UPLINK-TO-proxmox-node1 (LACP member 2)
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20
+ switchport trunk native vlan 99
+ channel-group 1 mode active
+!
+
+! --- Uplink to WiFi AP (trunk — carries Staff SSID + Guest SSID VLANs) ---
+interface GigabitEthernet1/0/10
+ description UPLINK-TO-ap-hq-01
+ switchport mode trunk
+ switchport trunk allowed vlan 30,60
+ switchport trunk native vlan 99
+ power inline auto
+!
+
+! --- Access port: staff workstation ---
+interface GigabitEthernet1/0/20
+ description STAFF-PC-FINANCE-01
+ switchport mode access
+ switchport access vlan 30
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+
+! --- Access port: warehouse scanner/terminal ---
+interface GigabitEthernet1/0/30
+ description WAREHOUSE-TERMINAL-01
+ switchport mode access
+ switchport access vlan 40
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+
+! --- Access port: VoIP desk phone (voice VLAN, PC daisy-chained behind it) ---
+interface GigabitEthernet1/0/40
+ description DESK-PHONE-01 (+ downstream PC on data VLAN)
+ switchport mode access
+ switchport access vlan 30
+ switchport voice vlan 50
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ power inline auto
+!
+
+! --- Access port: CCTV camera ---
+interface GigabitEthernet1/0/48
+ description CCTV-CAM-01
+ switchport mode access
+ switchport access vlan 70
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ power inline auto
+!
+
+! ============================================================
+! Design notes:
+! - Every access port carries exactly ONE VLAN, set explicitly — never
+!   left on the switch's default VLAN 1.
+! - portfast + bpduguard on every access (non-trunk) port: faster host
+!   boot-time connectivity, and the port auto-shuts if it ever sees a
+!   BPDU (i.e. someone plugs in an unauthorized switch/hub) — a basic,
+!   free control against accidental or malicious loop/rogue-switch
+!   insertion.
+! - Native VLAN is 99 on every trunk, matching docs/01 and docs/05 —
+!   VLAN 99 carries no real traffic, closing the classic VLAN-hopping
+!   double-tagging attack vector.
+! - This is the HQ pattern; branch switches follow the same access-port
+!   discipline but only need VLANs 10/30/40/50/60/70 per
+!   docs/01-network-architecture.md, and route inter-VLAN traffic
+!   through fw-north/fw-south rather than locally (branches don't have
+!   an L3 core switch — see docs/01 § LAN switching).
+! ============================================================

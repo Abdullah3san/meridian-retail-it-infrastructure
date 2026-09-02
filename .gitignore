@@ -1,0 +1,14 @@
+# Never commit real secrets if you adapt these sample configs for a real deployment
+.env
+*.env
+*_rsa
+*_ed25519
+*.pem
+*.key
+!configs/**/*.conf.sample
+
+# OS/editor cruft
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
