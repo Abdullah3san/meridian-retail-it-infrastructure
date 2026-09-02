@@ -1,5 +1,12 @@
 # Meridian Retail Group — Complete SMB IT Infrastructure
 
+[![Lint configs & docs](https://github.com/Abdullah3san/meridian-retail-it-infrastructure/actions/workflows/lint.yml/badge.svg)](.github/workflows/lint.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![Type](https://img.shields.io/badge/type-reference%20design-informational)
+![Stack](https://img.shields.io/badge/stack-open--source%20first-4a9c3f)
+![Sites](https://img.shields.io/badge/sites-3-orange)
+![Status](https://img.shields.io/badge/status-complete-brightgreen)
+
 A full, from-scratch IT infrastructure design for a fictional 3-location small business — **network, servers, security, and the complete software stack** — built as a portfolio piece to demonstrate end-to-end IT/infrastructure engineering.
 
 > **Company:** Meridian Retail Group — general merchandise retailer
@@ -8,6 +15,23 @@ A full, from-scratch IT infrastructure design for a fictional 3-location small b
 
 This repo is a **design document + reference implementation**, not a live production system. Every diagram is real (Mermaid, renders on GitHub), every config is a real, working sample (pfSense rules, WireGuard, VLANs, Docker Compose), and every architectural decision is explained — the point is to show *how* and *why*, not just *what*.
 
+<details>
+<summary><strong>Contents</strong></summary>
+
+- [Infrastructure Map](#infrastructure-map)
+- [Skills Demonstrated](#skills-demonstrated)
+- [Why This Exists](#why-this-exists)
+- [Repo Map](#repo-map)
+- [Start Here](#start-here)
+- [Full Documentation Index](#full-documentation-index)
+- [Diagrams](#diagrams)
+- [Configs](#configs-real-samples-not-screenshots)
+- [Architecture Decision Records](#architecture-decision-records)
+- [At a Glance](#at-a-glance)
+- [License](#license)
+
+</details>
+
 ---
 
 ## Infrastructure map
@@ -15,6 +39,16 @@ This repo is a **design document + reference implementation**, not a live produc
 ![Meridian Retail Group infrastructure map — HQ with a Proxmox server cluster and firewall connecting over a WireGuard VPN mesh to Branch North and Branch South, each with a firewall, switch, POS terminals, staff PCs, WiFi, and CCTV](diagrams/assets/infrastructure-map.svg)
 
 One-page view of all 3 sites — devices, VLANs, and the VPN mesh together. The [logical software map](diagrams/logical-architecture.md) and [security zones map](diagrams/dataflow-security-zones.md) below go deeper on the application and trust-boundary layers this map doesn't show.
+
+<details>
+<summary>Physical layer — HQ rack elevation</summary>
+<br>
+
+![HQ server room rack elevation — a 24U rack with a patch panel, core switch, and firewall at top, two Proxmox nodes, the backup server and NAS, 10U reserved for growth, and a UPS at the bottom](diagrams/assets/rack-elevation.svg)
+
+What's actually mounted where in the server room — the physical counterpart to the logical map above. Maps 1:1 to the [server hardware table](docs/02-server-infrastructure.md#physical-layer) and [cost breakdown](docs/08-cost-and-bom.md).
+
+</details>
 
 ---
 
@@ -44,6 +78,7 @@ Every row below is backed by a real doc or config in this repo, not just claimed
 | Identity lifecycle management (joiner/mover/leaver) | [03 — Identity & Access](docs/03-identity-and-access.md#joiner--mover--leaver-process) |
 | Linux systems administration & containerization | [`configs/docker-compose/`](configs/docker-compose/) |
 | DHCP/DNS architecture | [01 — Network Architecture](docs/01-network-architecture.md#dhcp--dns), [`kea-dhcp4.conf.sample`](configs/dhcp/kea-dhcp4.conf.sample) |
+| CI/CD & configuration validation (GitHub Actions) | [`.github/workflows/lint.yml`](.github/workflows/lint.yml) |
 
 **Business Systems, Operations & Planning**
 
@@ -68,9 +103,11 @@ Most "homelab" portfolios show one server running one app. Real SMB environments
 | Folder | What's in it |
 |---|---|
 | [`docs/`](docs/) | The written design — company profile, network, servers, identity, software, security, monitoring, DR, cost |
+| [`docs/adr/`](docs/adr/) | Architecture Decision Records — the trade-off reasoning behind the 6 biggest platform choices, downsides included |
 | [`diagrams/`](diagrams/) | Mermaid network/architecture/data-flow diagrams (render natively on GitHub) |
 | [`configs/`](configs/) | Real, working config samples — pfSense firewall rules, WireGuard site-to-site, VLANs, DHCP, Docker Compose stacks |
 | [`policies/`](policies/) | The paperwork side of IT — AUP, password policy, backup retention |
+| [`.github/workflows/`](.github/workflows/) | CI — validates every Compose stack, JSON config, Mermaid diagram, and internal doc link on every push |
 
 ## Start here
 
@@ -97,6 +134,7 @@ Most "homelab" portfolios show one server running one app. Real SMB environments
 ## Diagrams
 
 - [**Infrastructure Map**](diagrams/assets/infrastructure-map.svg) — poster-style, single-page view of every site, device, VLAN, and the VPN mesh (shown above)
+- [**Rack Elevation**](diagrams/assets/rack-elevation.svg) — the physical layer: what's mounted where in the HQ server room (shown above)
 - [Network Topology](diagrams/network-topology.md) — all 3 sites, WAN edges, VPN mesh, core devices
 - [VLAN Segmentation](diagrams/vlan-segmentation.md) — per-site VLAN layout and inter-VLAN policy
 - [Logical Software Architecture](diagrams/logical-architecture.md) — every service and how users reach it
@@ -109,6 +147,17 @@ Most "homelab" portfolios show one server running one app. Real SMB environments
 - [`configs/switch/`](configs/switch/) — VLAN/trunk config sample for a managed access switch
 - [`configs/dhcp/`](configs/dhcp/) — Kea DHCPv4 config sample
 - [`configs/docker-compose/`](configs/docker-compose/) — the self-hosted app stacks (monitoring, Nextcloud, Vaultwarden, etc.)
+
+## Architecture Decision Records
+
+The "why this, not the alternative" boxes throughout `docs/` are summaries — the full trade-off reasoning, including the honest downsides of each choice, lives in [`docs/adr/`](docs/adr/):
+
+- [ADR-0001](docs/adr/0001-pfsense-over-commercial-utm.md) — pfSense over a commercial UTM appliance
+- [ADR-0002](docs/adr/0002-wireguard-over-ipsec.md) — WireGuard over IPsec for site-to-site VPN
+- [ADR-0003](docs/adr/0003-proxmox-over-vmware.md) — Proxmox VE over VMware vSphere
+- [ADR-0004](docs/adr/0004-samba-ad-over-cloud-idp.md) — Samba 4 AD over a cloud identity provider
+- [ADR-0005](docs/adr/0005-erpnext-over-point-solutions.md) — ERPNext over point-solution SaaS
+- [ADR-0006](docs/adr/0006-dhcp-local-per-site.md) — DHCP served locally per site, not centralized
 
 ## At a glance
 

@@ -1,6 +1,6 @@
 # 01 — Network Architecture
 
-See also: [Network Topology Diagram](../diagrams/network-topology.md), [VLAN Segmentation Diagram](../diagrams/vlan-segmentation.md), config samples in [`configs/pfsense/`](../configs/pfsense/), [`configs/switch/`](../configs/switch/), [`configs/dhcp/`](../configs/dhcp/).
+See also: [Network Topology Diagram](../diagrams/network-topology.md), [VLAN Segmentation Diagram](../diagrams/vlan-segmentation.md), config samples in [`configs/pfsense/`](../configs/pfsense/), [`configs/switch/`](../configs/switch/), [`configs/dhcp/`](../configs/dhcp/). Full trade-off reasoning behind the platform choices below: [ADR-0001](adr/0001-pfsense-over-commercial-utm.md) (pfSense), [ADR-0002](adr/0002-wireguard-over-ipsec.md) (WireGuard), [ADR-0006](adr/0006-dhcp-local-per-site.md) (local DHCP).
 
 ## Design goals
 

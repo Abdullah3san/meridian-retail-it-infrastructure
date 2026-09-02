@@ -1,0 +1,85 @@
+name: Lint configs & docs
+
+# Validates every config sample and doc in this repo on push/PR so a bad
+# edit (invalid Compose syntax, malformed JSON, a broken relative link)
+# gets caught before it lands on main, not discovered by a reader.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate-docker-compose:
+    name: Validate Docker Compose stacks
+    runs-on: ubuntu-latest
+    # These sample stacks reference .env vars documented inline but not
+    # committed (see .gitignore) — supply throwaway values so
+    # `compose config` can fully resolve and validate the syntax.
+    env:
+      ZABBIX_DB_PASSWORD: dummy-ci-value
+      GRAFANA_ADMIN_PASSWORD: dummy-ci-value
+      DB_ROOT_PASSWORD: dummy-ci-value
+      DB_PASSWORD: dummy-ci-value
+      NC_ADMIN_USER: dummy-ci-value
+      NC_ADMIN_PASSWORD: dummy-ci-value
+      VW_ADMIN_TOKEN: dummy-ci-value
+      SMTP_USER: dummy-ci-value
+      SMTP_PASSWORD: dummy-ci-value
+    steps:
+      - uses: actions/checkout@v4
+      - name: docker compose config (syntax check) for each stack
+        run: |
+          set -e
+          for f in configs/docker-compose/*.yml; do
+            echo "== $f =="
+            docker compose -f "$f" config -q
+          done
+
+  validate-json:
+    name: Validate JSON configs (Kea DHCP)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check well-formed JSON
+        run: |
+          set -e
+          # Kea's config is JSON even though the sample keeps a .conf.sample
+          # extension (matching how pfSense/Kea ship it) — validate directly.
+          files="configs/dhcp/kea-dhcp4.conf.sample"
+          for f in $(find configs -name '*.json' 2>/dev/null) $files; do
+            echo "== $f =="
+            python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$f"
+          done
+
+  lint-markdown-links:
+    name: Check for broken relative links in docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint relative markdown links
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: 'yes'
+          config-file: '.github/workflows/markdown-link-check-config.json'
+
+  validate-mermaid:
+    name: Validate Mermaid diagram syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract and validate each mermaid block
+        run: |
+          set -e
+          npm install -g @mermaid-js/mermaid-cli
+          fail=0
+          for f in diagrams/*.md; do
+            awk '/```mermaid/{flag=1; n++; file="/tmp/mmd-'"$$"'-" n ".mmd"; next} /```/{flag=0} flag{print > file}' "$f"
+          done
+          for mmd in /tmp/mmd-*.mmd; do
+            [ -e "$mmd" ] || continue
+            echo "== $mmd =="
+            mmdc -i "$mmd" -o "${mmd}.svg" || fail=1
+          done
+          exit $fail

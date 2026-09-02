@@ -1,6 +1,6 @@
 # 03 — Identity & Access Management
 
-See also: [Logical Software Architecture](../diagrams/logical-architecture.md), [05 — Security Architecture](05-security-architecture.md), [policies/password-policy.md](../policies/password-policy.md)
+See also: [Logical Software Architecture](../diagrams/logical-architecture.md), [05 — Security Architecture](05-security-architecture.md), [policies/password-policy.md](../policies/password-policy.md). Full trade-off reasoning: [ADR-0004 — Samba 4 AD over a cloud identity provider](adr/0004-samba-ad-over-cloud-idp.md).
 
 ## Design goals
 

@@ -1,6 +1,6 @@
 # 04 — Software Stack
 
-See also: [Logical Software Architecture](../diagrams/logical-architecture.md), [02 — Server Infrastructure](02-server-infrastructure.md), Docker Compose samples in [`configs/docker-compose/`](../configs/docker-compose/)
+See also: [Logical Software Architecture](../diagrams/logical-architecture.md), [02 — Server Infrastructure](02-server-infrastructure.md), Docker Compose samples in [`configs/docker-compose/`](../configs/docker-compose/). Full trade-off reasoning: [ADR-0005 — ERPNext over point-solution SaaS](adr/0005-erpnext-over-point-solutions.md).
 
 ## Philosophy
 

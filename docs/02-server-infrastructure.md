@@ -1,6 +1,6 @@
 # 02 — Server Infrastructure
 
-See also: [Logical Software Architecture Diagram](../diagrams/logical-architecture.md), [04 — Software Stack](04-software-stack.md), [07 — Disaster Recovery](07-disaster-recovery.md)
+See also: [Logical Software Architecture Diagram](../diagrams/logical-architecture.md), [04 — Software Stack](04-software-stack.md), [07 — Disaster Recovery](07-disaster-recovery.md). Full trade-off reasoning: [ADR-0003 — Proxmox VE over VMware vSphere](adr/0003-proxmox-over-vmware.md).
 
 ## Design goals
 
@@ -10,6 +10,8 @@ See also: [Logical Software Architecture Diagram](../diagrams/logical-architectu
 4. Storage and backup are separate concerns from compute, so a compute failure never threatens a backup
 
 ## Physical layer
+
+See the [rack elevation diagram](../diagrams/assets/rack-elevation.svg) for exactly what's mounted where in the HQ server room.
 
 | Role | Hardware | Notes |
 |---|---|---|
