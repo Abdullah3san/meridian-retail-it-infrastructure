@@ -12,16 +12,17 @@ updates:
         patterns: ["*"]
         update-types: [minor, patch]
     # Other major bumps still arrive as their own PR, since they can need
-    # migration steps and a doc update. Nextcloud and MariaDB majors are
-    # ignored: the design deliberately tracks Nextcloud's "production" channel
-    # and MariaDB LTS, so those are bumped by hand when that channel moves.
-    # Zabbix uses a rolling `alpine-7.0-latest` tag (7.0 LTS), so it picks up
-    # patches on pull and isn't managed here.
+    # migration steps and a doc update. Some are ignored on purpose because
+    # the design tracks long-term-support lines, bumped by hand when that
+    # line moves: Nextcloud's "production" channel, MariaDB LTS, and Zabbix
+    # 7.0 LTS (patch updates only, so it never drifts to 7.2/7.4 standard).
     ignore:
       - dependency-name: nextcloud
         update-types: [version-update:semver-major]
       - dependency-name: mariadb
         update-types: [version-update:semver-major]
+      - dependency-name: "zabbix/*"
+        update-types: [version-update:semver-major, version-update:semver-minor]
 
   - package-ecosystem: github-actions
     directory: /
