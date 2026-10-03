@@ -28,7 +28,7 @@ jobs:
       SMTP_USER: dummy-ci-value
       SMTP_PASSWORD: dummy-ci-value
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: docker compose config (syntax check) for each stack
         run: |
           set -e
@@ -41,7 +41,7 @@ jobs:
     name: Validate JSON configs (Kea DHCP)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Check well-formed JSON
         run: |
           set -e
@@ -57,7 +57,7 @@ jobs:
     name: Check for broken relative links in docs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Lint relative markdown links
         # Maintained successor of the archived gaurav-nelson action; same config format.
         uses: tcort/github-action-markdown-link-check@v1
@@ -69,8 +69,8 @@ jobs:
     name: Validate Mermaid diagram syntax
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
       - name: Extract and validate each mermaid block
