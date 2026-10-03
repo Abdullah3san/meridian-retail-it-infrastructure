@@ -1,17 +1,14 @@
 # Vaultwarden stack — vault01
 # Design context: docs/03-identity-and-access.md (Password & secrets management)
 
-version: "3.8"
-
 services:
   vaultwarden:
-    image: vaultwarden/server:1.32.0-alpine
+    image: vaultwarden/server:1.37.3-alpine
     restart: unless-stopped
     environment:
       DOMAIN: "https://vault.meridianretail.local"
       SIGNUPS_ALLOWED: "false"        # Admin invites only — no open self-registration
       INVITATIONS_ALLOWED: "true"
-      WEBSOCKET_ENABLED: "true"
       ADMIN_TOKEN: ${VW_ADMIN_TOKEN}  # Long random token — store this itself in the "IT Admin" collection, docs/03
       SMTP_HOST: mail01.meridianretail.local
       SMTP_FROM: vault@meridianretail.local

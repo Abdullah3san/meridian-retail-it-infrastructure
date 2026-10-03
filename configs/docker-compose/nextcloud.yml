@@ -5,11 +5,9 @@
 # the "LDAP/AD integration" app in Nextcloud's admin settings, pointed at
 # dc01.meridianretail.local:389 — see docs/03-identity-and-access.md.
 
-version: "3.8"
-
 services:
   nextcloud-db:
-    image: mariadb:11
+    image: mariadb:11.4   # LTS line — supported into 2029
     restart: unless-stopped
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
     environment:
@@ -19,17 +17,31 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
       - nc-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks: [nextcloud]
 
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks: [nextcloud]
 
   nextcloud:
-    image: nextcloud:29-apache
+    image: nextcloud:34-apache   # Track the "production" channel, not the newest major
     restart: unless-stopped
-    depends_on: [nextcloud-db, redis]
+    depends_on:
+      nextcloud-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       MYSQL_HOST: nextcloud-db
       MYSQL_DATABASE: nextcloud
@@ -39,11 +51,29 @@ services:
       NEXTCLOUD_ADMIN_PASSWORD: ${NC_ADMIN_PASSWORD}
       NEXTCLOUD_TRUSTED_DOMAINS: files.meridianretail.local
       REDIS_HOST: redis
+      # TLS terminates at the reverse proxy — without these, Nextcloud builds
+      # http:// links and logs the proxy's IP instead of the real client's.
+      TRUSTED_PROXIES: 10.10.20.0/24
+      OVERWRITEPROTOCOL: https
+      OVERWRITEHOST: files.meridianretail.local
     ports:
       - "127.0.0.1:8081:80"   # Fronted by internal reverse proxy — reachable via SSO (docs/03), never public
     volumes:
       - nc-app-data:/var/www/html
       - nc-user-data:/var/www/html/data   # Departmental data lives here — backed up nightly, docs/07
+    networks: [nextcloud]
+
+  # Runs Nextcloud's background jobs (file scans, previews, cleanup) every
+  # 5 min. Without it Nextcloud falls back to AJAX cron, which only runs
+  # when someone has the web UI open.
+  nextcloud-cron:
+    image: nextcloud:34-apache
+    restart: unless-stopped
+    entrypoint: /cron.sh
+    depends_on: [nextcloud]
+    volumes:
+      - nc-app-data:/var/www/html
+      - nc-user-data:/var/www/html/data
     networks: [nextcloud]
 
 networks:

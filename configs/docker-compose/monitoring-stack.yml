@@ -7,8 +7,6 @@
 # This is a runnable reference — review resource limits/volumes for your
 # actual hardware before using in production.
 
-version: "3.8"
-
 services:
   zabbix-db:
     image: postgres:16-alpine
@@ -19,12 +17,19 @@ services:
       POSTGRES_DB: zabbix
     volumes:
       - zabbix-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zabbix -d zabbix"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks: [monitoring]
 
   zabbix-server:
-    image: zabbix/zabbix-server-pgsql:6.4-alpine
+    image: zabbix/zabbix-server-pgsql:alpine-7.0-latest   # 7.0 LTS — supported into 2029
     restart: unless-stopped
-    depends_on: [zabbix-db]
+    depends_on:
+      zabbix-db:
+        condition: service_healthy   # Don't let the server race an uninitialised DB
     environment:
       DB_SERVER_HOST: zabbix-db
       POSTGRES_USER: zabbix
@@ -37,9 +42,13 @@ services:
     networks: [monitoring]
 
   zabbix-web:
-    image: zabbix/zabbix-web-nginx-pgsql:6.4-alpine
+    image: zabbix/zabbix-web-nginx-pgsql:alpine-7.0-latest
     restart: unless-stopped
-    depends_on: [zabbix-server, zabbix-db]
+    depends_on:
+      zabbix-db:
+        condition: service_healthy
+      zabbix-server:
+        condition: service_started
     environment:
       DB_SERVER_HOST: zabbix-db
       POSTGRES_USER: zabbix
@@ -52,12 +61,12 @@ services:
     networks: [monitoring]
 
   grafana:
-    image: grafana/grafana:11.1.0
+    image: grafana/grafana:12.4.12
     restart: unless-stopped
     depends_on: [zabbix-web]
     environment:
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
-      GF_INSTALL_PLUGINS: alexanderzobnin-zabbix-app   # Zabbix datasource plugin
+      GF_PLUGINS_PREINSTALL: alexanderzobnin-zabbix-app   # Zabbix datasource plugin (replaces deprecated GF_INSTALL_PLUGINS)
       GF_AUTH_DISABLE_LOGIN_FORM: "false"
     ports:
       - "127.0.0.1:3000:3000"   # Fronted by the DMZ reverse proxy, not exposed directly

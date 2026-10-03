@@ -59,7 +59,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Lint relative markdown links
-        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        # Maintained successor of the archived gaurav-nelson action; same config format.
+        uses: tcort/github-action-markdown-link-check@v1
         with:
           use-quiet-mode: 'yes'
           config-file: '.github/workflows/markdown-link-check-config.json'
@@ -69,17 +70,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
       - name: Extract and validate each mermaid block
         run: |
           set -e
-          npm install -g @mermaid-js/mermaid-cli
-          fail=0
-          for f in diagrams/*.md; do
-            awk '/```mermaid/{flag=1; n++; file="/tmp/mmd-'"$$"'-" n ".mmd"; next} /```/{flag=0} flag{print > file}' "$f"
+          npm install -g @mermaid-js/mermaid-cli@11
+          # Ubuntu 24.04 runners block the unprivileged user namespaces
+          # Chrome's sandbox needs, so headless Chrome must run without it.
+          echo '{"args":["--no-sandbox","--disable-setuid-sandbox"]}' > /tmp/puppeteer.json
+          mkdir -p /tmp/mmd
+          for f in $(grep -rl '```mermaid' --include='*.md' diagrams docs); do
+            # Name each block after its source file so blocks don't overwrite each other.
+            awk -v p="/tmp/mmd/$(basename "$f" .md)" \
+              '/```mermaid/{flag=1; n++; file=p "-" n ".mmd"; next} /```/{flag=0} flag{print > file}' "$f"
           done
-          for mmd in /tmp/mmd-*.mmd; do
-            [ -e "$mmd" ] || continue
+          fail=0
+          for mmd in /tmp/mmd/*.mmd; do
             echo "== $mmd =="
-            mmdc -i "$mmd" -o "${mmd}.svg" || fail=1
+            mmdc -p /tmp/puppeteer.json -i "$mmd" -o "${mmd}.svg" || fail=1
           done
           exit $fail
