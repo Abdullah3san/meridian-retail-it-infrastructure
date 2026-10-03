@@ -11,7 +11,7 @@ git clone https://github.com/mailcow/mailcow-dockerized
 cd mailcow-dockerized
 ./generate_config.sh
 # When prompted:
-#   Mail server hostname: mail.meridianretail.local
+#   Mail server hostname: mail.meridianretail.com
 #   Timezone: (site-appropriate)
 docker compose pull
 docker compose up -d
@@ -21,7 +21,7 @@ docker compose up -d
 
 | Step | Where it's covered |
 |---|---|
-| SPF/DKIM/DMARC records on the public DNS zone for `meridianretail.local` | Standard Mailcow DKIM key export → added as TXT records at the domain registrar |
+| SPF/DKIM/DMARC records on the public DNS zone for `meridianretail.com` | Standard Mailcow DKIM key export → added as TXT records at the domain registrar |
 | Mailbox provisioning synced to AD group membership | [03 — Identity & Access](../../docs/03-identity-and-access.md) — mailboxes created/disabled alongside the joiner/mover/leaver process |
 | Only reachable via the DMZ reverse proxy (443) + direct SMTP (25) | [05 — Security Architecture](../../docs/05-security-architecture.md#dmz--public-facing-services) |
 | Zammad ticket queues fed from `support@` / `it-help@` | [04 — Software Stack](../../docs/04-software-stack.md#zammad--helpdesk--ticketing) |

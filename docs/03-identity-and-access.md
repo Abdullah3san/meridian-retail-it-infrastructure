@@ -12,7 +12,7 @@ See also: [Logical Software Architecture](../diagrams/logical-architecture.md), 
 ## Directory: Samba 4 Active Directory
 
 - `dc01` (primary) and `dc02` (secondary, different Proxmox node) run **Samba 4 in AD DC mode** — a real, Kerberos/LDAP-compatible Active Directory implementation, not a lookalike. Windows machines domain-join to it exactly as they would to Windows Server AD.
-- Domain: `meridianretail.local`. Both DCs are also authoritative internal DNS for the domain (see [01 — Network Architecture](01-network-architecture.md#dhcp--dns)).
+- Domain: `corp.meridianretail.com` (NetBIOS `MERIDIAN`) — a subdomain of the public `meridianretail.com`, never `.local`; reasoning in [ADR-0007](adr/0007-ad-domain-subdomain-not-local.md). Both DCs are also authoritative internal DNS for the domain (see [01 — Network Architecture](01-network-architecture.md#dhcp--dns)).
 - Organizational Units mirror the org: `OU=HQ`, `OU=BranchNorth`, `OU=BranchSouth`, each with `Staff`, `Workstations`, and role-based security groups (`GRP-Finance`, `GRP-Warehouse`, `GRP-POS`, `GRP-ITAdmins`, …).
 - Group Policy (GPO) enforces: screen lock after 10 minutes idle, disallow local admin for standard staff, drive mappings to Nextcloud/departmental shares, Windows Update deferral rings (IT tests updates on a pilot group before broad rollout).
 - Why Samba AD instead of a cloud directory (Entra ID/Google Workspace) as the *primary* source of truth: it's free, it works when the internet is down (local auth for domain-joined machines), and it's what on-prem file/print/VoIP infrastructure expects. Cloud IdPs are a valid alternative if the business later goes fully cloud-first — noted as a future option, not the current design.

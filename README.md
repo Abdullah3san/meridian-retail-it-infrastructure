@@ -79,6 +79,7 @@ Every row below is backed by a real doc or config in this repo, not just claimed
 | Linux systems administration & containerization | [`configs/docker-compose/`](configs/docker-compose/) |
 | DHCP/DNS architecture | [01 — Network Architecture](docs/01-network-architecture.md#dhcp--dns), [`kea-dhcp4.conf.sample`](configs/dhcp/kea-dhcp4.conf.sample) |
 | CI/CD & configuration validation (GitHub Actions) | [`.github/workflows/lint.yml`](.github/workflows/lint.yml) |
+| Patch management for pinned images (Dependabot) | [`.github/dependabot.yml`](.github/dependabot.yml) |
 
 **Business Systems, Operations & Planning**
 
@@ -103,7 +104,7 @@ Most "homelab" portfolios show one server running one app. Real SMB environments
 | Folder | What's in it |
 |---|---|
 | [`docs/`](docs/) | The written design — company profile, network, servers, identity, software, security, monitoring, DR, cost |
-| [`docs/adr/`](docs/adr/) | Architecture Decision Records — the trade-off reasoning behind the 6 biggest platform choices, downsides included |
+| [`docs/adr/`](docs/adr/) | Architecture Decision Records — the trade-off reasoning behind the 7 biggest platform choices, downsides included |
 | [`diagrams/`](diagrams/) | Mermaid network/architecture/data-flow diagrams (render natively on GitHub) |
 | [`configs/`](configs/) | Real, working config samples — pfSense firewall rules, WireGuard site-to-site, VLANs, DHCP, Docker Compose stacks |
 | [`policies/`](policies/) | The paperwork side of IT — AUP, password policy, backup retention |
@@ -158,6 +159,7 @@ The "why this, not the alternative" boxes throughout `docs/` are summaries — t
 - [ADR-0004](docs/adr/0004-samba-ad-over-cloud-idp.md) — Samba 4 AD over a cloud identity provider
 - [ADR-0005](docs/adr/0005-erpnext-over-point-solutions.md) — ERPNext over point-solution SaaS
 - [ADR-0006](docs/adr/0006-dhcp-local-per-site.md) — DHCP served locally per site, not centralized
+- [ADR-0007](docs/adr/0007-ad-domain-subdomain-not-local.md) — AD domain as a `corp.` subdomain, not `.local`
 
 ## At a glance
 
@@ -180,4 +182,4 @@ Documentation and configs in this repo are provided under the [MIT License](LICE
 
 ---
 
-*This is a portfolio/reference design. Company name, addresses, and IP ranges are fictional. Config samples are meant to be read and adapted, not copy-pasted into a production network without review.*
+*This is a portfolio/reference design. Company name, domain names (`meridianretail.com`), addresses, and IP ranges are fictional. Config samples are meant to be read and adapted, not copy-pasted into a production network without review.*

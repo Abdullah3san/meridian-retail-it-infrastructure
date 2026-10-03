@@ -91,7 +91,7 @@ Full inter-VLAN allow/deny matrix is in [05 — Security Architecture](05-securi
 ## DHCP & DNS
 
 - **DHCP:** each site's pfSense runs DHCP locally for its own VLANs (via the ISC/Kea DHCP package). This is a deliberate resilience choice — if the WAN/VPN link to HQ is down, branch devices still get leases and local routing keeps working. Sample Kea config: [`configs/dhcp/kea-dhcp4.conf.sample`](../configs/dhcp/kea-dhcp4.conf.sample).
-- **DNS:** each firewall runs Unbound as a local resolver. Queries for `meridianretail.local` are forwarded over the VPN to the HQ AD DNS servers (Samba, see [03](03-identity-and-access.md)); everything else resolves via DNS-over-TLS upstream, filtered through pfBlockerNG for malware/ad domains (see [05](05-security-architecture.md)).
+- **DNS:** each firewall runs Unbound as a local resolver. Queries for `corp.meridianretail.com` are forwarded over the VPN to the HQ AD DNS servers (Samba, see [03](03-identity-and-access.md)); everything else resolves via DNS-over-TLS upstream, filtered through pfBlockerNG for malware/ad domains (see [05](05-security-architecture.md)).
 
 ## Why this design, not the alternatives
 

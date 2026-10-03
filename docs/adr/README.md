@@ -12,5 +12,6 @@ Format follows the standard lightweight ADR template (context → decision → c
 | [0004](0004-samba-ad-over-cloud-idp.md) | Identity: Samba 4 AD over a cloud identity provider | Accepted |
 | [0005](0005-erpnext-over-point-solutions.md) | Business systems: ERPNext over point-solution SaaS | Accepted |
 | [0006](0006-dhcp-local-per-site.md) | DHCP served locally per site instead of centralized at HQ | Accepted |
+| [0007](0007-ad-domain-subdomain-not-local.md) | AD domain: `corp.` subdomain of the public domain, not `.local` | Accepted |
 
 Each ADR is referenced from the design doc it affects — e.g. ADR-0001 is linked from [01 — Network Architecture](../01-network-architecture.md#why-this-design-not-the-alternatives).

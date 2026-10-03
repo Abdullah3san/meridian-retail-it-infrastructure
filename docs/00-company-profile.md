@@ -60,6 +60,7 @@
 
 ## Naming conventions used throughout this repo
 
-- Internal domain: `meridianretail.local`
+- Public domain: `meridianretail.com` — website and email addresses
+- Internal AD/DNS domain: `corp.meridianretail.com` (NetBIOS name `MERIDIAN`) — a delegated subdomain of the public domain, not `.local` (see [ADR-0007](adr/0007-ad-domain-subdomain-not-local.md))
 - Hostname pattern: `<service>-<site>` for site-specific gear (e.g. `fw-hq`, `sw-north`), `<service>0<n>` for centrally hosted VMs (e.g. `erp01`, `files01`)
 - Site codes: `HQ`, `BRN` (Branch North), `BRS` (Branch South) — used in IP addressing and diagrams

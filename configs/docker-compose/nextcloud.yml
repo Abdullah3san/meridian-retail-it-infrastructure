@@ -3,7 +3,7 @@
 #
 # LDAP integration against dc01 (Samba AD) is configured post-deploy via
 # the "LDAP/AD integration" app in Nextcloud's admin settings, pointed at
-# dc01.meridianretail.local:389 — see docs/03-identity-and-access.md.
+# dc01.corp.meridianretail.com:389 — see docs/03-identity-and-access.md.
 
 services:
   nextcloud-db:
@@ -49,13 +49,13 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}
       NEXTCLOUD_ADMIN_USER: ${NC_ADMIN_USER}
       NEXTCLOUD_ADMIN_PASSWORD: ${NC_ADMIN_PASSWORD}
-      NEXTCLOUD_TRUSTED_DOMAINS: files.meridianretail.local
+      NEXTCLOUD_TRUSTED_DOMAINS: files.corp.meridianretail.com
       REDIS_HOST: redis
       # TLS terminates at the reverse proxy — without these, Nextcloud builds
       # http:// links and logs the proxy's IP instead of the real client's.
       TRUSTED_PROXIES: 10.10.20.0/24
       OVERWRITEPROTOCOL: https
-      OVERWRITEHOST: files.meridianretail.local
+      OVERWRITEHOST: files.corp.meridianretail.com
     ports:
       - "127.0.0.1:8081:80"   # Fronted by internal reverse proxy — reachable via SSO (docs/03), never public
     volumes:

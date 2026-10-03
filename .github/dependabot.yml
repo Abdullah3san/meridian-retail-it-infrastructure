@@ -1,0 +1,32 @@
+# Keeps the pinned versions in this repo from going stale: opens a PR when a
+# newer image tag or action release is out, so CI validates the bump before
+# it lands on main.
+version: 2
+updates:
+  - package-ecosystem: docker-compose
+    directory: /configs/docker-compose
+    schedule:
+      interval: weekly
+    groups:
+      compose-images:
+        patterns: ["*"]
+        update-types: [minor, patch]
+    # Other major bumps still arrive as their own PR, since they can need
+    # migration steps and a doc update. Nextcloud and MariaDB majors are
+    # ignored: the design deliberately tracks Nextcloud's "production" channel
+    # and MariaDB LTS, so those are bumped by hand when that channel moves.
+    # Zabbix uses a rolling `alpine-7.0-latest` tag (7.0 LTS), so it picks up
+    # patches on pull and isn't managed here.
+    ignore:
+      - dependency-name: nextcloud
+        update-types: [version-update:semver-major]
+      - dependency-name: mariadb
+        update-types: [version-update:semver-major]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
