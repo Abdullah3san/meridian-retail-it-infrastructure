@@ -65,6 +65,7 @@ Every row below is backed by a real doc or config in this repo, not just claimed
 | Site-to-site VPN (WireGuard, hub-and-spoke) | [`wireguard-site-to-site.conf.sample`](configs/pfsense/wireguard-site-to-site.conf.sample) |
 | IP addressing & subnetting at multi-site scale | [01 — Network Architecture](docs/01-network-architecture.md#ip-addressing-plan) |
 | PCI-DSS-aware network design (POS isolation) | [05 — Security Architecture](docs/05-security-architecture.md#vlan-to-vlan-policy) |
+| PCI DSS v4.0.1 scoping & control mapping (P2PE, SAQ P2PE) | [09 — PCI DSS Control Map](docs/09-pci-dss-control-map.md), [ADR-0008](docs/adr/0008-p2pe-terminals-for-pci-scope.md) |
 | SIEM / EDR / log correlation (Wazuh) | [05 — Security Architecture](docs/05-security-architecture.md#siem--edr-wazuh), [`configs/docker-compose/wazuh/`](configs/docker-compose/wazuh/) |
 | Switch VLAN/trunk configuration | [`vlan-config-sample.txt`](configs/switch/vlan-config-sample.txt) |
 
@@ -92,6 +93,7 @@ Every row below is backed by a real doc or config in this repo, not just claimed
 | Disaster recovery planning (RTO/RPO, runbooks) | [07 — Disaster Recovery](docs/07-disaster-recovery.md) |
 | Backup architecture (3-2-1, tested restores) | [07 — Disaster Recovery](docs/07-disaster-recovery.md#the-3-2-1-chain), [Backup & DR Flow](diagrams/backup-dr-flow.md) |
 | IT policy writing (AUP, password/MFA, retention) | [`policies/`](policies/) |
+| Incident response (runbooks with containment, evidence, recovery) | [`runbooks/`](runbooks/) |
 | Cost/TCO analysis & build-vs-buy reasoning | [08 — Cost & BOM](docs/08-cost-and-bom.md) |
 | Technical documentation & systems diagramming | this repo, in full |
 
@@ -106,11 +108,12 @@ Most "homelab" portfolios show one server running one app. Real SMB environments
 | Folder | What's in it |
 |---|---|
 | [`docs/`](docs/) | The written design — company profile, network, servers, identity, software, security, monitoring, DR, cost |
-| [`docs/adr/`](docs/adr/) | Architecture Decision Records — the trade-off reasoning behind the 7 biggest platform choices, downsides included |
+| [`docs/adr/`](docs/adr/) | Architecture Decision Records — the trade-off reasoning behind the 8 biggest platform choices, downsides included |
 | [`diagrams/`](diagrams/) | Mermaid network/architecture/data-flow diagrams (render natively on GitHub) |
 | [`configs/`](configs/) | Real, working config samples — pfSense firewall rules, WireGuard site-to-site, VLANs, DHCP, Docker Compose stacks |
 | [`iac/`](iac/) | Infrastructure as Code — Terraform provisions the server VMs on Proxmox, Ansible hardens them, joins them to AD, and deploys the stacks from `configs/` |
 | [`policies/`](policies/) | The paperwork side of IT — AUP, password policy, backup retention |
+| [`runbooks/`](runbooks/) | Incident runbooks — step-by-step response to ransomware, a lost or tampered POS device, and ISP failure |
 | [`.github/workflows/`](.github/workflows/) | CI — validates every Compose stack, JSON config, Mermaid diagram, the Terraform and Ansible code, and every internal doc link on every push |
 
 ## Start here
@@ -134,6 +137,8 @@ Most "homelab" portfolios show one server running one app. Real SMB environments
 - [06 — Monitoring & Observability](docs/06-monitoring-observability.md)
 - [07 — Disaster Recovery](docs/07-disaster-recovery.md)
 - [08 — Cost & Bill of Materials](docs/08-cost-and-bom.md)
+- [09 — PCI DSS Control Map](docs/09-pci-dss-control-map.md)
+- [Incident runbooks](runbooks/) — ransomware, lost/tampered POS device, ISP failure
 
 ## Diagrams
 
@@ -164,6 +169,7 @@ The "why this, not the alternative" boxes throughout `docs/` are summaries — t
 - [ADR-0005](docs/adr/0005-erpnext-over-point-solutions.md) — ERPNext over point-solution SaaS
 - [ADR-0006](docs/adr/0006-dhcp-local-per-site.md) — DHCP served locally per site, not centralized
 - [ADR-0007](docs/adr/0007-ad-domain-subdomain-not-local.md) — AD domain as a `corp.` subdomain, not `.local`
+- [ADR-0008](docs/adr/0008-p2pe-terminals-for-pci-scope.md) — P2PE card terminals, keeping the network out of PCI scope
 
 ## At a glance
 

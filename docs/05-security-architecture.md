@@ -21,7 +21,7 @@ See also: [Security Zones & Data Flow](../diagrams/dataflow-security-zones.md), 
 Full matrix and rationale: [VLAN Segmentation diagram](../diagrams/vlan-segmentation.md#inter-vlan-policy-summary). Key principles the firewall rules enforce:
 
 - **Default deny between VLANs.** Every inter-VLAN allow is an explicit rule with a documented reason — there is no "allow LAN to any" rule anywhere in this design.
-- **POS isolation (PCI):** the POS VLAN at each branch can reach exactly one destination outside itself — the ERPNext POS API port at HQ, over the VPN. No internet access, no access to other VLANs, no access to other branches.
+- **POS isolation (PCI):** the POS VLAN at each branch can reach exactly two destinations outside itself: the ERPNext POS API port at HQ (over the VPN) and the payment processor's endpoints (TCP 443, card readers only). No general internet access, no access to other VLANs, no access to other branches. The card readers are processor-supplied P2PE devices, so this VLAN never carries clear-text card data; the segmentation is a second layer on top of that, not the only one. Scoping decision: [ADR-0008](adr/0008-p2pe-terminals-for-pci-scope.md); requirement-by-requirement mapping: [09 — PCI DSS Control Map](09-pci-dss-control-map.md).
 - **CCTV/IoT isolation:** cameras and the NVR have no route to the internet and no route to staff/server VLANs. The NVR is the only device on that VLAN permitted an outbound rule (for cloud backup of footage, if used) — everything else is fully contained.
 - **Guest isolation:** internet-only, with client isolation enabled at the AP so guest devices can't even see each other, let alone reach internal VLANs.
 - **Native VLAN trap (VLAN 99):** switch trunk ports are explicitly set to an unused native VLAN. This closes the classic VLAN-hopping attack where an untagged frame lands on the default VLAN 1 and inherits more access than intended — VLAN 99 carries no traffic and has no firewall rules permitting anything, so a stray untagged frame goes nowhere.
@@ -61,8 +61,10 @@ Covered in [03 — Identity & Access](03-identity-and-access.md#remote-access) �
 ## Incident response (lightweight, one-admin-operable)
 
 1. **Detect** — Wazuh alert or Zabbix anomaly ([06](06-monitoring-observability.md)) triggers a notification (email/Slack webhook).
-2. **Contain** — isolate the affected VLAN or host at the firewall (pre-written pfSense rule templates for "quarantine this subnet" kept ready, not written from scratch mid-incident).
+2. **Contain** — isolate the affected VLAN or host at the firewall (a pre-built `QUARANTINE` alias and block rule kept ready, not written from scratch mid-incident).
 3. **Eradicate/Recover** — restore affected VM(s) from the most recent known-good Proxmox Backup Server snapshot ([07 — Disaster Recovery](07-disaster-recovery.md)) rather than attempting to clean an unknown compromise in place.
 4. **Document** — incident writeup added to BookStack ([04](04-software-stack.md)) so the next occurrence (or the next admin) has a reference.
+
+Step-by-step versions for the three most likely incidents live in [`runbooks/`](../runbooks/): ransomware on a staff PC, a lost or tampered POS device, and an ISP failure.
 
 This is intentionally simple — a formal IR retainer / external SOC is a reasonable next step as the business grows, but the design above is what's realistically operable at this scale today.

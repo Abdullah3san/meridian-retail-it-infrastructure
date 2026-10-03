@@ -69,7 +69,7 @@ Covered in [03 — Identity & Access](03-identity-and-access.md#password--secret
 
 Being "open-source first" doesn't mean self-hosting everything regardless of cost/benefit. Two exceptions, and why:
 
-- **Card payment processing** — handled by a PCI-DSS-certified payment processor (e.g. Stripe/Square terminal integration into ERPNext), never custom-built. Payment card data should never touch infrastructure this business operates itself; that's what PCI-DSS scoping exists to prevent.
+- **Card payment processing** — handled by a PCI-DSS-certified payment processor (e.g. Stripe/Square terminal integration into ERPNext), never custom-built. The readers come from the processor's PCI-listed P2PE solution, so payment card data never touches infrastructure this business operates itself — that's what PCI-DSS scoping exists to prevent. Reasoning: [ADR-0008](adr/0008-p2pe-terminals-for-pci-scope.md).
 - **Office productivity (docs/spreadsheets/slides for collaborative editing)** — a case where a hosted office suite (e.g. Microsoft 365 Apps or Google Workspace, seat-licensed) is pragmatically better than self-hosted alternatives (Collabora/OnlyOffice) for a non-technical staff used to Word/Excel. Noted as a deliberate SaaS exception, not an oversight — see [08 — Cost & BOM](08-cost-and-bom.md) for the trade-off.
 
 ## Software-to-VM map

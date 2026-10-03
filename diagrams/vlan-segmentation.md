@@ -42,7 +42,7 @@ flowchart LR
     style N70 fill:#fff0f0,stroke:#c0392b
 ```
 
-**Color key:** red = fully isolated from internal network (guest, CCTV/IoT — internet/NVR only, no route to staff/server VLANs); amber = PCI-sensitive, allowed only to the specific ERP POS API port at HQ, nothing else.
+**Color key:** red = fully isolated from internal network (guest, CCTV/IoT — internet/NVR only, no route to staff/server VLANs); amber = PCI-sensitive, allowed only to the specific ERP POS API port at HQ and (card readers only) the payment processor's endpoints, nothing else — see [ADR-0008](../docs/adr/0008-p2pe-terminals-for-pci-scope.md).
 
 ## Inter-VLAN policy summary
 

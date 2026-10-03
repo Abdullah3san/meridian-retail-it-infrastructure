@@ -13,7 +13,7 @@ Enforced via AD fine-grained password policy (GPO):
 | Minimum length | 14 characters | Length beats complexity rules for real-world resistance to cracking |
 | Complexity | Required (mix of character classes) | Baseline AD default, kept |
 | Maximum age | None (no forced periodic rotation) | Forced rotation drives weak, predictable patterns (`Summer2024!` → `Summer2025!`) — modern guidance (NIST 800-63B) favors length + breach monitoring over rotation |
-| Account lockout | 10 failed attempts / 15 min lockout window | Balances brute-force resistance against accidental lockout from typos |
+| Account lockout | 10 failed attempts / 30 min lockout (or until IT verifies identity) | Matches PCI DSS 8.3.4's floor ([09](../docs/09-pci-dss-control-map.md)); a locked-out user can call the helpdesk instead of waiting |
 | Breach monitoring | Wazuh alerts on repeated auth failures against AD | See [05 — Security Architecture](../docs/05-security-architecture.md#siem--edr-wazuh) |
 
 ## Multi-factor authentication

@@ -57,6 +57,8 @@
 | Proactive alerting | [06 — Monitoring & Observability](06-monitoring-observability.md) |
 | Backup & real restore path | [07 — Disaster Recovery](07-disaster-recovery.md) |
 | Budget reality check | [08 — Cost & Bill of Materials](08-cost-and-bom.md) |
+| Card payments isolated (PCI-DSS) | [09 — PCI DSS Control Map](09-pci-dss-control-map.md), [ADR-0008](adr/0008-p2pe-terminals-for-pci-scope.md) |
+| Knowing what to do when it breaks | [Incident runbooks](../runbooks/) |
 
 ## Naming conventions used throughout this repo
 

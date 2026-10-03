@@ -6,7 +6,7 @@ See also: [Network Topology Diagram](../diagrams/network-topology.md), [VLAN Seg
 
 1. Every site can be administered remotely by one IT generalist
 2. A branch losing WAN doesn't lose the ability to sell (local DHCP/routing, cached POS)
-3. PCI-relevant traffic (POS) is on its own VLAN with no route to anything except the payment processor and the ERP server
+3. PCI-relevant traffic (POS) is on its own VLAN with no route to anything except the payment processor and the ERP server ([ADR-0008](adr/0008-p2pe-terminals-for-pci-scope.md))
 4. Guest and IoT/CCTV traffic never touches the internal network
 5. All three sites appear as one address space, routed cleanly, no overlapping subnets
 

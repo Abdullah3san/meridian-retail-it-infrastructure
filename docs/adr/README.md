@@ -13,5 +13,6 @@ Format follows the standard lightweight ADR template (context → decision → c
 | [0005](0005-erpnext-over-point-solutions.md) | Business systems: ERPNext over point-solution SaaS | Accepted |
 | [0006](0006-dhcp-local-per-site.md) | DHCP served locally per site instead of centralized at HQ | Accepted |
 | [0007](0007-ad-domain-subdomain-not-local.md) | AD domain: `corp.` subdomain of the public domain, not `.local` | Accepted |
+| [0008](0008-p2pe-terminals-for-pci-scope.md) | Card payments: processor P2PE terminals, keeping the network out of PCI scope | Accepted |
 
 Each ADR is referenced from the design doc it affects — e.g. ADR-0001 is linked from [01 — Network Architecture](../01-network-architecture.md#why-this-design-not-the-alternatives).
