@@ -1,0 +1,3 @@
+---
+- name: Deploy stack {{ compose_stack }}
+  ansible.builtin.include_tasks: "{{ compose_stack if compose_stack in app_stack_upstream else 'compose' }}.yml"

@@ -1,0 +1,28 @@
+---
+# Copy to vault.yml, fill in, then encrypt:
+#   ansible-vault encrypt inventory/group_vars/all/vault.yml
+# vault.yml is gitignored; only this example is committed.
+
+# AD account allowed to join computers (delegated "join to domain" only,
+# not a Domain Admin — docs/03 least privilege).
+vault_ad_join_user: svc-domainjoin
+vault_ad_join_password: change-me
+
+# One block per compose stack; rendered into that stack's .env on the host.
+vault_stack_env:
+  nextcloud:
+    DB_ROOT_PASSWORD: change-me
+    DB_PASSWORD: change-me
+    NC_ADMIN_USER: admin
+    NC_ADMIN_PASSWORD: change-me
+  vaultwarden:
+    VW_ADMIN_TOKEN: change-me-to-a-long-random-string
+    SMTP_USER: vault@meridianretail.com
+    SMTP_PASSWORD: change-me
+  monitoring:
+    ZABBIX_DB_PASSWORD: change-me
+    GRAFANA_ADMIN_PASSWORD: change-me
+  wazuh:
+    WAZUH_INDEXER_PASSWORD: change-me
+    WAZUH_API_PASSWORD: change-me
+    WAZUH_DASHBOARD_PASSWORD: change-me

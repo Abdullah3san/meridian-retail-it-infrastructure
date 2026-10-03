@@ -32,6 +32,8 @@ See the [rack elevation diagram](../diagrams/assets/rack-elevation.svg) for exac
 
 All VMs live on VLAN 20 (Servers) at HQ. Each VM is a single-purpose, small footprint — easier to patch, back up, and reason about than one monolithic "everything server."
 
+The VMs below are defined as code: [`iac/terraform`](../iac/terraform/) provisions them (sizing, node placement, IPs) and [`iac/ansible`](../iac/ansible/) configures them. See [`iac/README.md`](../iac/README.md) for the full mapping.
+
 | # | Hostname | Service | Purpose | Doc |
 |---|---|---|---|---|
 | 1 | `dc01` | Samba 4 AD DC | Primary domain controller, internal DNS | [03](03-identity-and-access.md) |

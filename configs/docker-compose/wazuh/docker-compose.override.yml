@@ -1,0 +1,44 @@
+# Wazuh — this design's changes on top of the official single-node stack.
+# Design context: docs/05-security-architecture.md (SIEM / EDR: Wazuh)
+#
+# Not a fork: upstream's wazuh-docker/single-node/docker-compose.yml is
+# used unmodified at a pinned release, and Compose merges this file over it
+# automatically (same directory, standard override filename). Upgrading
+# means bumping the tag, not re-diffing a hand-copied 100-line stack.
+#
+# What it changes, and why:
+#   1. No hard-coded demo passwords — all three come from .env (the vault).
+#   2. Only what agents and firewalls must reach is published. Upstream
+#      exposes the indexer (9200) and API (55000) to the whole LAN; here
+#      the indexer stays on the internal Compose network and the API and
+#      dashboard bind to localhost behind the reverse proxy + SSO (docs/03).
+#   3. Indexer heap sized for siem01 (16 GB VM — iac/terraform/main.tf).
+
+services:
+  wazuh.manager:
+    environment:
+      - INDEXER_PASSWORD=${WAZUH_INDEXER_PASSWORD}
+      - API_PASSWORD=${WAZUH_API_PASSWORD}
+    ports: !override
+      - "1514:1514"             # Agent event stream (TCP) — every server + workstation
+      - "1515:1515"             # Agent enrollment
+      - "514:514/udp"           # Syslog from fw-hq / fw-north / fw-south (ossec-meridian.conf)
+      - "127.0.0.1:55000:55000" # Manager API — admin use on-box only
+
+  wazuh.indexer:
+    environment:
+      - "OPENSEARCH_JAVA_OPTS=-Xms4g -Xmx4g"
+    ports: !reset []            # Reached only by manager + dashboard, over the Compose network
+
+  wazuh.dashboard:
+    environment:
+      - INDEXER_PASSWORD=${WAZUH_INDEXER_PASSWORD}
+      - DASHBOARD_PASSWORD=${WAZUH_DASHBOARD_PASSWORD}
+      - API_PASSWORD=${WAZUH_API_PASSWORD}
+    ports: !override
+      - "127.0.0.1:5601:5601"   # Fronted by the internal reverse proxy + Authelia MFA, never direct
+
+# .env (rendered by iac/ansible from the vault — never committed):
+#   WAZUH_INDEXER_PASSWORD=change-me    # indexer 'admin' user
+#   WAZUH_DASHBOARD_PASSWORD=change-me  # indexer 'kibanaserver' user
+#   WAZUH_API_PASSWORD=Change-Me.1      # API 'wazuh-wui' — needs upper, lower, digit, symbol

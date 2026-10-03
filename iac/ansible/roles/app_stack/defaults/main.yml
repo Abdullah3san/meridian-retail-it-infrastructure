@@ -1,0 +1,21 @@
+---
+app_stack_root: /opt/stacks
+
+# The repo's own configs/ directory — the same files a reader sees are the
+# files that get deployed.
+app_stack_configs: "{{ playbook_dir }}/../../configs/docker-compose"
+
+# Stacks whose compose file lives in this repo, copied as-is.
+app_stack_files:
+  nextcloud: nextcloud.yml
+  vaultwarden: vaultwarden.yml
+  monitoring: monitoring-stack.yml
+
+# Stacks deployed from their official upstream bundle + this repo's overrides.
+app_stack_upstream: [wazuh, mailcow]
+
+app_stack_wazuh_repo: https://github.com/wazuh/wazuh-docker.git
+app_stack_wazuh_dir: "{{ app_stack_root }}/wazuh-docker/single-node"
+
+app_stack_mailcow_repo: https://github.com/mailcow/mailcow-dockerized.git
+app_stack_mailcow_dir: /opt/mailcow-dockerized # Mailcow's update.sh expects its own checkout

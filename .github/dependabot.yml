@@ -31,3 +31,8 @@ updates:
     groups:
       actions:
         patterns: ["*"]
+
+  - package-ecosystem: terraform
+    directory: /iac/terraform
+    schedule:
+      interval: weekly

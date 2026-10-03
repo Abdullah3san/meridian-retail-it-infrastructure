@@ -1,0 +1,31 @@
+# Mailcow — this design's settings, applied over the mailcow.conf that
+# Mailcow's own generate_config.sh creates on mail01.
+# Design context: docs/04-software-stack.md (Mailcow), docs/05 (DMZ)
+#
+# Why a settings file and not a docker-compose.yml: Mailcow's ~15-container
+# stack is generated and updated by Mailcow itself (update.sh), and every
+# supported customisation goes through mailcow.conf. Committing a copy of
+# their compose file would only drift out of date; committing *these
+# decisions* keeps the real config reviewable. iac/ansible applies each
+# KEY=VALUE line below (roles/app_stack/tasks/mailcow.yml).
+
+# Public mail hostname — MX, SPF, and the TLS certificate all use it (ADR-0007)
+MAILCOW_HOSTNAME=mail.meridianretail.com
+TZ=Etc/UTC
+
+# Staff use IMAP/ActiveSync/webmail only. POP3 and ManageSieve are bound to
+# localhost so they're not exposed at all — less surface, nothing lost.
+POP_PORT=127.0.0.1:110
+POPS_PORT=127.0.0.1:995
+SIEVE_PORT=127.0.0.1:4190
+
+# Attachment scanning stays on (docs/05 — Endpoint security). mail01 has
+# 8 GB RAM, well above ClamAV's ~2.5 GB requirement.
+SKIP_CLAMD=n
+
+# The site network is IPv4-only (docs/01); Mailcow warns that half-configured
+# IPv6 can turn it into an open relay, so it's off explicitly.
+ENABLE_IPV6=false
+
+# Container health alerts go to the same IT inbox as Zabbix (docs/06).
+WATCHDOG_NOTIFY_EMAIL=it-alerts@meridianretail.com

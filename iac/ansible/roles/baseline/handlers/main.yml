@@ -1,0 +1,17 @@
+---
+- name: Restart chrony
+  ansible.builtin.service:
+    name: chrony
+    state: restarted
+
+# Validate before reloading so a bad config can't lock everyone out.
+- name: Reload sshd
+  listen: Reload sshd
+  ansible.builtin.command: sshd -t
+  changed_when: false
+  notify: Reload sshd service
+
+- name: Reload sshd service
+  ansible.builtin.service:
+    name: ssh
+    state: reloaded

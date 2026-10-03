@@ -1,0 +1,59 @@
+---
+- name: Install AD client packages
+  ansible.builtin.apt:
+    name: "{{ domain_join_packages }}"
+    state: present
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+
+- name: Check current domain membership
+  ansible.builtin.command: realm list --name-only
+  register: domain_join_realms
+  changed_when: false
+
+- name: Join the domain
+  when: ad_domain not in domain_join_realms.stdout_lines
+  ansible.builtin.command:
+    argv:
+      - realm
+      - join
+      - --user={{ vault_ad_join_user }}
+      - --computer-ou={{ domain_join_ou }}
+      - "{{ ad_domain }}"
+    stdin: "{{ vault_ad_join_password }}"
+  no_log: true # the join password is on stdin
+  changed_when: true
+
+# Only the named AD groups may log in at all; everyone else in the domain is
+# denied, even with valid credentials (least privilege, docs/03).
+- name: Configure sssd
+  community.general.ini_file:
+    path: /etc/sssd/sssd.conf
+    section: "domain/{{ ad_domain }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    mode: "0600"
+  loop:
+    - { option: use_fully_qualified_names, value: "False" }
+    - { option: fallback_homedir, value: "/home/%u" }
+    - { option: access_provider, value: simple }
+    - { option: simple_allow_groups, value: "{{ ad_ssh_groups | join(', ') }}" }
+  notify: Restart sssd
+
+- name: Create home directories on first AD login
+  ansible.builtin.lineinfile:
+    path: /etc/pam.d/common-session
+    line: session optional pam_mkhomedir.so skel=/etc/skel umask=0077
+    insertafter: '^session\s+optional\s+pam_sss\.so'
+
+- name: Grant sudo to AD admin groups
+  ansible.builtin.copy:
+    dest: /etc/sudoers.d/ad-admins
+    mode: "0440"
+    validate: visudo -cf %s
+    # sssd's AD provider is case-insensitive and reports group names lowercased.
+    content: |
+      # Managed by Ansible (iac/ansible/roles/domain_join)
+      {% for group in ad_sudo_groups %}
+      %{{ group | lower }} ALL=(ALL:ALL) ALL
+      {% endfor %}

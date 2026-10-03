@@ -1,0 +1,11 @@
+---
+baseline_packages:
+  - unattended-upgrades
+  - apt-listchanges
+  - chrony
+  - qemu-guest-agent
+  - needrestart
+  - git
+  - curl
+  - gpg
+  - python3-debian # Needed by Ansible's deb822_repository (Docker, Wazuh repos)

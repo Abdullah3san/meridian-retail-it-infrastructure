@@ -27,6 +27,9 @@ jobs:
       VW_ADMIN_TOKEN: dummy-ci-value
       SMTP_USER: dummy-ci-value
       SMTP_PASSWORD: dummy-ci-value
+      WAZUH_INDEXER_PASSWORD: dummy-ci-value
+      WAZUH_DASHBOARD_PASSWORD: dummy-ci-value
+      WAZUH_API_PASSWORD: dummy-ci-value
     steps:
       - uses: actions/checkout@v4
       - name: docker compose config (syntax check) for each stack
@@ -36,6 +39,57 @@ jobs:
             echo "== $f =="
             docker compose -f "$f" config -q
           done
+      - name: Wazuh override still merges onto the pinned upstream release
+        run: |
+          set -e
+          # Same version Ansible deploys — one source of truth.
+          v=$(sed -n 's/^wazuh_version: "\([^"]*\)".*/\1/p' iac/ansible/inventory/group_vars/all/main.yml)
+          mkdir -p /tmp/wazuh && cd /tmp/wazuh
+          curl -fsSL -o docker-compose.yml "https://raw.githubusercontent.com/wazuh/wazuh-docker/v$v/single-node/docker-compose.yml"
+          cp "$GITHUB_WORKSPACE/configs/docker-compose/wazuh/docker-compose.override.yml" .
+          docker compose config -q
+          echo "override merges cleanly onto wazuh-docker v$v"
+
+  validate-terraform:
+    name: Validate Terraform
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: iac/terraform
+    env:
+      TF_VAR_proxmox_api_token: dummy-ci-value
+      TF_VAR_ansible_ssh_public_key: ssh-ed25519 dummy-ci-value
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+      - run: terraform fmt -check -recursive
+      - run: terraform init -backend=false -input=false
+      - run: terraform validate
+      - name: Committed Ansible inventory matches what Terraform would generate
+        run: |
+          echo 'templatefile("templates/inventory.yml.tftpl", { vms = local.vms, domain = var.domain, groups = sort(distinct(flatten([for vm in values(local.vms) : vm.groups]))) })' \
+            | terraform console > /tmp/rendered.txt
+          # console wraps the string in <<EOT ... EOT; strip that and trailing blank lines
+          sed '1d;$d' /tmp/rendered.txt | sed -e :a -e '/^\n*$/{$d;N;ba' -e '}' > /tmp/hosts.yml
+          diff -u ../ansible/inventory/hosts.yml /tmp/hosts.yml
+
+  lint-ansible:
+    name: Lint Ansible
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: iac/ansible
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install ansible-core ansible-lint
+      - run: ansible-galaxy collection install -r requirements.yml
+      - run: ansible-playbook site.yml --syntax-check
+      - run: ansible-lint
 
   validate-json:
     name: Validate JSON configs (Kea DHCP)

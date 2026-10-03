@@ -34,10 +34,14 @@ These are representative rule tables per interface/VLAN, in the order pfSense ev
 | 3 | Pass | TCP | VLAN30 net | VLAN20 (erp01/files01/wiki01/helpdesk01/vault01) | 443 | Staff → business apps (via SSO) |
 | 4 | Pass | TCP | Branch POS nets (via VPN) | VLAN20 (erp01) | 8443 | POS API only — no other VLAN20 host |
 | 5 | Pass | UDP | VLAN20 (voip01) | VLAN50 nets (all sites, via VPN) | 5060,10000-20000 | SIP/RTP |
-| 6 | Pass | TCP | VLAN20 net | WAN (specific: updates, SMTP relay, cloud backup endpoint) | 443,587 | Outbound allow-list only — not "any" |
-| 7 | Block | any | VLAN20 net | WAN | any | Everything else outbound denied |
-| 8 | Block | any | VLAN60/70 net | VLAN20 net | any | Guest/IoT can never initiate to servers |
-| 9 | Block | any | any | any | any | Default deny |
+| 6 | Pass | TCP | Staff/back-office nets (all sites, via VPN) | VLAN20 (siem01) | 1514,1515 | Wazuh agents on workstations → manager ([wazuh/](../docker-compose/wazuh/)) |
+| 7 | Pass | UDP | Firewall MGMT addresses (all 3 sites, via VPN) | VLAN20 (siem01) | 514 | pfSense remote syslog → Wazuh |
+| 8 | Pass | TCP | VLAN20 net | WAN (specific: updates, SMTP relay, cloud backup endpoint) | 443,587 | Outbound allow-list only — not "any" |
+| 9 | Pass | UDP | VLAN20 (dc01/dc02) | WAN (NTP pool) | 123 | DCs are the domain's time source; every other server syncs to them (Kerberos needs <5 min skew) |
+| 10 | Pass | TCP | VLAN20 (mail01) | WAN | 25 | Outbound mail delivery to other mail servers — the one host allowed to originate SMTP |
+| 11 | Block | any | VLAN20 net | WAN | any | Everything else outbound denied |
+| 12 | Block | any | VLAN60/70 net | VLAN20 net | any | Guest/IoT can never initiate to servers |
+| 13 | Block | any | any | any | any | Default deny |
 
 ## Interface: VLAN 30 — Staff
 

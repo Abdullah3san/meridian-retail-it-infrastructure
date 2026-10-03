@@ -1,0 +1,25 @@
+---
+- name: Create the stack directory
+  ansible.builtin.file:
+    path: "{{ app_stack_root }}/{{ compose_stack }}"
+    state: directory
+    mode: "0750"
+
+- name: Copy the compose file from configs/docker-compose
+  ansible.builtin.copy:
+    src: "{{ app_stack_configs }}/{{ app_stack_files[compose_stack] }}"
+    dest: "{{ app_stack_root }}/{{ compose_stack }}/compose.yml"
+    mode: "0644"
+
+- name: Write the stack's secrets to .env
+  ansible.builtin.template:
+    src: env.j2
+    dest: "{{ app_stack_root }}/{{ compose_stack }}/.env"
+    mode: "0600"
+  no_log: true
+
+- name: Start the stack
+  community.docker.docker_compose_v2:
+    project_src: "{{ app_stack_root }}/{{ compose_stack }}"
+    state: present
+    pull: missing

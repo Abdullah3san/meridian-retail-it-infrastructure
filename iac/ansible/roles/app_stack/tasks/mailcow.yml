@@ -1,0 +1,40 @@
+---
+# Mailcow manages its own lifecycle (generate_config.sh to install, update.sh
+# to upgrade), so Ansible installs it once and then only enforces the
+# settings in configs/docker-compose/mailcow/mailcow.conf.overrides.
+
+- name: Fetch mailcow-dockerized
+  ansible.builtin.git:
+    repo: "{{ app_stack_mailcow_repo }}"
+    dest: "{{ app_stack_mailcow_dir }}"
+    version: master
+    update: false # Upgrades go through Mailcow's own update.sh
+
+- name: Generate mailcow.conf (first run only, unattended)
+  ansible.builtin.command:
+    cmd: ./generate_config.sh
+    chdir: "{{ app_stack_mailcow_dir }}"
+    creates: "{{ app_stack_mailcow_dir }}/mailcow.conf"
+  environment:
+    MAILCOW_HOSTNAME: mail.meridianretail.com
+    MAILCOW_TZ: "{{ timezone }}"
+    MAILCOW_BRANCH: master
+    SKIP_CLAMD: "n"
+    ENABLE_IPV6: "false"
+
+- name: Apply this design's settings to mailcow.conf
+  ansible.builtin.lineinfile:
+    path: "{{ app_stack_mailcow_dir }}/mailcow.conf"
+    regexp: "^{{ item.split('=', 1)[0] }}="
+    line: "{{ item }}"
+  loop: >-
+    {{ lookup('ansible.builtin.file', app_stack_configs + '/mailcow/mailcow.conf.overrides').splitlines()
+       | reject('match', '^\s*(#|$)') | list }}
+  register: app_stack_mailcow_conf
+
+- name: Start Mailcow (recreating containers if settings changed)
+  community.docker.docker_compose_v2:
+    project_src: "{{ app_stack_mailcow_dir }}"
+    state: present
+    pull: missing
+    recreate: "{{ 'always' if app_stack_mailcow_conf is changed else 'auto' }}"

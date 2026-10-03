@@ -1,0 +1,84 @@
+---
+# Upstream bundle at the pinned release + configs/docker-compose/wazuh/.
+# `update: false` is deliberate: a Wazuh upgrade means bumping wazuh_version
+# for the manager AND every agent together, never a silent pull.
+
+- name: Raise vm.max_map_count (the indexer refuses to start below this)
+  ansible.posix.sysctl:
+    name: vm.max_map_count
+    value: "262144"
+    sysctl_set: true
+
+- name: Fetch the official wazuh-docker bundle
+  ansible.builtin.git:
+    repo: "{{ app_stack_wazuh_repo }}"
+    dest: "{{ app_stack_root }}/wazuh-docker"
+    version: "v{{ wazuh_version }}"
+    update: false
+
+- name: Add this design's compose override
+  ansible.builtin.copy:
+    src: "{{ app_stack_configs }}/wazuh/docker-compose.override.yml"
+    dest: "{{ app_stack_wazuh_dir }}/docker-compose.override.yml"
+    mode: "0644"
+
+- name: Add this design's manager config (firewall syslog, active response)
+  ansible.builtin.blockinfile:
+    path: "{{ app_stack_wazuh_dir }}/config/wazuh_cluster/wazuh_manager.conf"
+    marker: "<!-- {mark} MERIDIAN MANAGED BLOCK -->"
+    block: "{{ lookup('ansible.builtin.file', app_stack_configs + '/wazuh/ossec-meridian.conf') }}"
+    insertafter: EOF
+
+- name: Write the stack's secrets to .env
+  ansible.builtin.template:
+    src: env.j2
+    dest: "{{ app_stack_wazuh_dir }}/.env"
+    mode: "0600"
+  no_log: true
+
+- name: Check whether first-time setup has run
+  ansible.builtin.stat:
+    path: "{{ app_stack_wazuh_dir }}/.meridian-initialised"
+  register: app_stack_wazuh_init
+
+# The indexer seeds its users from internal_users.yml only when its data
+# volume is empty, so the real passwords must be in place before first start.
+- name: First-time setup
+  when: not app_stack_wazuh_init.stat.exists
+  block:
+    - name: Generate the stack's internal TLS certificates
+      ansible.builtin.command:
+        cmd: docker compose -f generate-indexer-certs.yml run --rm generator
+        chdir: "{{ app_stack_wazuh_dir }}"
+        creates: "{{ app_stack_wazuh_dir }}/config/wazuh_indexer_ssl_certs/root-ca.pem"
+
+    - name: Replace the demo password hashes for the indexer users
+      ansible.builtin.replace:
+        path: "{{ app_stack_wazuh_dir }}/config/wazuh_indexer/internal_users.yml"
+        regexp: '(^{{ item.user }}:\n\s+hash: ")[^"]+'
+        replace: '\g<1>{{ item.password | password_hash("bcrypt", ident="2y") }}'
+      loop:
+        - { user: admin, password: "{{ vault_stack_env.wazuh.WAZUH_INDEXER_PASSWORD }}" }
+        - { user: kibanaserver, password: "{{ vault_stack_env.wazuh.WAZUH_DASHBOARD_PASSWORD }}" }
+      no_log: true
+
+    - name: Point the dashboard at the real API password
+      ansible.builtin.replace:
+        path: "{{ app_stack_wazuh_dir }}/config/wazuh_dashboard/wazuh.yml"
+        regexp: '(password: ")[^"]*'
+        replace: '\g<1>{{ vault_stack_env.wazuh.WAZUH_API_PASSWORD }}'
+      no_log: true
+
+- name: Start the stack
+  community.docker.docker_compose_v2:
+    project_src: "{{ app_stack_wazuh_dir }}"
+    state: present
+    pull: missing
+
+- name: Record that first-time setup is done
+  ansible.builtin.file:
+    path: "{{ app_stack_wazuh_dir }}/.meridian-initialised"
+    state: touch
+    mode: "0600"
+    modification_time: preserve
+    access_time: preserve

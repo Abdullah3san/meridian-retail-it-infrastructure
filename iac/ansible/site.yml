@@ -1,0 +1,38 @@
+---
+# Configures every VM that iac/terraform provisions.
+#
+#   ansible-galaxy collection install -r requirements.yml
+#   ansible-playbook site.yml --ask-vault-pass
+#
+# Safe to re-run: every role converges to the same state, so this is also
+# how drift gets corrected (e.g. someone hand-edits sshd_config).
+
+- name: Baseline every server
+  hosts: all
+  become: true
+  roles:
+    - baseline
+
+# The DCs are deliberately not automated past the baseline: promoting the
+# first Samba AD DC (`samba-tool domain provision`) is a one-time, judgement-
+# heavy step done by hand per docs/03. Everything below depends on it.
+
+- name: Join member servers to AD
+  hosts: member_servers
+  become: true
+  roles:
+    - domain_join
+
+- name: Enrol every server in Wazuh
+  hosts: all:!siem01 # siem01 runs the manager itself
+  become: true
+  roles:
+    - wazuh_agent
+
+- name: Deploy containerised app stacks
+  hosts: app_hosts
+  become: true
+  roles:
+    - docker
+    - role: app_stack
+      when: compose_stack is defined

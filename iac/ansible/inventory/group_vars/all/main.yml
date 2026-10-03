@@ -1,0 +1,19 @@
+---
+# Non-secret settings shared by every host. Secrets live in vault.yml
+# (ansible-vault encrypted, gitignored) — see vault.yml.example.
+
+timezone: Etc/UTC
+
+dc_servers: [10.10.20.11, 10.10.20.12]
+
+# AD groups (docs/03) allowed to SSH in and to sudo on member servers.
+ad_ssh_groups: [GRP-ITAdmins]
+ad_sudo_groups: [GRP-ITAdmins]
+
+wazuh_manager: siem01.corp.meridianretail.com
+wazuh_version: "4.14.8" # Keep in lock-step with the manager image (configs/docker-compose/wazuh)
+
+# Mount point for the optional second disk (Terraform `data_disk`). When a
+# host has one, Docker's data-root moves onto it too, so container volumes
+# (e.g. Nextcloud user files) live on the big disk, not the OS disk.
+data_mount: /srv/data

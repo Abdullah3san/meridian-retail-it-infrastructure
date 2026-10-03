@@ -1,0 +1,13 @@
+---
+domain_join_packages:
+  - realmd
+  - sssd
+  - sssd-tools
+  - adcli
+  - libnss-sss
+  - libpam-sss
+  - samba-common-bin
+  - krb5-user
+
+# Servers get their own OU so server GPOs never apply to workstations (docs/03).
+domain_join_ou: "OU=Servers,OU=HQ,DC=corp,DC=meridianretail,DC=com"

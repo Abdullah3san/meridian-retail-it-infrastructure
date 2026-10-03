@@ -5,10 +5,21 @@
 *_ed25519
 *.pem
 *.key
-!configs/**/*.conf.sample
 
 # OS/editor cruft
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+
+# Terraform — state and real variable values stay local
+.terraform/
+*.tfstate
+*.tfstate.*
+terraform.tfvars
+crash.log
+
+# Ansible — the real (encrypted) vault and any vault password file
+iac/ansible/inventory/group_vars/all/vault.yml
+.vault_pass*
+*.retry

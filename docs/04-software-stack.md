@@ -30,7 +30,7 @@ Every business function below could be a separate SaaS subscription. At 60 staff
 
 **Replaces:** Google Workspace / Microsoft 365 mail (for mail specifically — see the note on M365 below).
 
-- `mail01`, full Docker Compose stack (Postfix, Dovecot, Rspamd, SOGo webmail) — see [`configs/docker-compose/mailcow-note.md`](../configs/docker-compose/mailcow-note.md).
+- `mail01`, full Docker Compose stack (Postfix, Dovecot, Rspamd, SOGo webmail) — see [`configs/docker-compose/mailcow/`](../configs/docker-compose/mailcow/) (settings + deployment) and [`iac/ansible`](../iac/ansible/) (automated install).
 - SPF/DKIM/DMARC configured on the public DNS zone; Rspamd handles spam/phishing filtering.
 - Mailboxes provisioned/deprovisioned by syncing against AD group membership, keeping mail access tied to the same joiner/mover/leaver process as everything else ([03](03-identity-and-access.md)).
 

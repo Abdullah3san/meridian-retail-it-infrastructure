@@ -1,0 +1,31 @@
+---
+- name: Add the Wazuh apt repository
+  ansible.builtin.deb822_repository:
+    name: wazuh
+    uris: "{{ wazuh_agent_repo }}"
+    suites: stable
+    components: main
+    signed_by: "{{ wazuh_agent_key }}"
+
+- name: Install the agent, pinned to the manager's version
+  ansible.builtin.apt:
+    name: "wazuh-agent={{ wazuh_version }}-1"
+    update_cache: true
+    allow_downgrade: true
+  environment:
+    WAZUH_MANAGER: "{{ wazuh_manager }}"
+    WAZUH_AGENT_NAME: "{{ inventory_hostname }}"
+    WAZUH_AGENT_GROUP: "{{ 'domain_controllers' if inventory_hostname in groups['domain_controllers'] else 'servers' }}"
+
+# An agent newer than the manager is unsupported, so unattended-upgrades must
+# not move it: agent and manager versions are bumped together, deliberately.
+- name: Hold the agent package at the pinned version
+  ansible.builtin.dpkg_selections:
+    name: wazuh-agent
+    selection: hold
+
+- name: Start the agent
+  ansible.builtin.service:
+    name: wazuh-agent
+    state: started
+    enabled: true

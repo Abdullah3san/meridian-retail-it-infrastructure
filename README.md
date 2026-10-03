@@ -65,7 +65,7 @@ Every row below is backed by a real doc or config in this repo, not just claimed
 | Site-to-site VPN (WireGuard, hub-and-spoke) | [`wireguard-site-to-site.conf.sample`](configs/pfsense/wireguard-site-to-site.conf.sample) |
 | IP addressing & subnetting at multi-site scale | [01 — Network Architecture](docs/01-network-architecture.md#ip-addressing-plan) |
 | PCI-DSS-aware network design (POS isolation) | [05 — Security Architecture](docs/05-security-architecture.md#vlan-to-vlan-policy) |
-| SIEM / EDR / log correlation (Wazuh) | [05 — Security Architecture](docs/05-security-architecture.md#siem--edr-wazuh), [`wazuh-note.md`](configs/docker-compose/wazuh-note.md) |
+| SIEM / EDR / log correlation (Wazuh) | [05 — Security Architecture](docs/05-security-architecture.md#siem--edr-wazuh), [`configs/docker-compose/wazuh/`](configs/docker-compose/wazuh/) |
 | Switch VLAN/trunk configuration | [`vlan-config-sample.txt`](configs/switch/vlan-config-sample.txt) |
 
 **Systems, Virtualization & Identity**
@@ -78,6 +78,8 @@ Every row below is backed by a real doc or config in this repo, not just claimed
 | Identity lifecycle management (joiner/mover/leaver) | [03 — Identity & Access](docs/03-identity-and-access.md#joiner--mover--leaver-process) |
 | Linux systems administration & containerization | [`configs/docker-compose/`](configs/docker-compose/) |
 | DHCP/DNS architecture | [01 — Network Architecture](docs/01-network-architecture.md#dhcp--dns), [`kea-dhcp4.conf.sample`](configs/dhcp/kea-dhcp4.conf.sample) |
+| Infrastructure as Code — VM provisioning (Terraform + Proxmox) | [`iac/terraform/`](iac/terraform/) |
+| Configuration management (Ansible — hardening, AD join, agents, app deploy) | [`iac/ansible/`](iac/ansible/) |
 | CI/CD & configuration validation (GitHub Actions) | [`.github/workflows/lint.yml`](.github/workflows/lint.yml) |
 | Patch management for pinned images (Dependabot) | [`.github/dependabot.yml`](.github/dependabot.yml) |
 
@@ -107,8 +109,9 @@ Most "homelab" portfolios show one server running one app. Real SMB environments
 | [`docs/adr/`](docs/adr/) | Architecture Decision Records — the trade-off reasoning behind the 7 biggest platform choices, downsides included |
 | [`diagrams/`](diagrams/) | Mermaid network/architecture/data-flow diagrams (render natively on GitHub) |
 | [`configs/`](configs/) | Real, working config samples — pfSense firewall rules, WireGuard site-to-site, VLANs, DHCP, Docker Compose stacks |
+| [`iac/`](iac/) | Infrastructure as Code — Terraform provisions the server VMs on Proxmox, Ansible hardens them, joins them to AD, and deploys the stacks from `configs/` |
 | [`policies/`](policies/) | The paperwork side of IT — AUP, password policy, backup retention |
-| [`.github/workflows/`](.github/workflows/) | CI — validates every Compose stack, JSON config, Mermaid diagram, and internal doc link on every push |
+| [`.github/workflows/`](.github/workflows/) | CI — validates every Compose stack, JSON config, Mermaid diagram, the Terraform and Ansible code, and every internal doc link on every push |
 
 ## Start here
 
@@ -147,7 +150,8 @@ Most "homelab" portfolios show one server running one app. Real SMB environments
 - [`configs/pfsense/`](configs/pfsense/) — firewall rule tables, WireGuard site-to-site sample, VLAN interfaces
 - [`configs/switch/`](configs/switch/) — VLAN/trunk config sample for a managed access switch
 - [`configs/dhcp/`](configs/dhcp/) — Kea DHCPv4 config sample
-- [`configs/docker-compose/`](configs/docker-compose/) — the self-hosted app stacks (monitoring, Nextcloud, Vaultwarden, etc.)
+- [`configs/docker-compose/`](configs/docker-compose/) — the self-hosted app stacks (monitoring, Nextcloud, Vaultwarden, plus Wazuh and Mailcow as overrides on their official bundles)
+- [`iac/`](iac/) — Terraform + Ansible that build the server layer and deploy these configs ([how it fits together](iac/README.md))
 
 ## Architecture Decision Records
 

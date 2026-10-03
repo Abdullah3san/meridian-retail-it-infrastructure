@@ -1,0 +1,8 @@
+{
+{% if data_disk_device is defined %}
+  "data-root": "{{ data_mount }}/docker",
+{% endif %}
+  "log-driver": "json-file",
+  "log-opts": { "max-size": "50m", "max-file": "5" },
+  "live-restore": true
+}

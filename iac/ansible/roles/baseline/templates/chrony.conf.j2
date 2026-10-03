@@ -1,0 +1,13 @@
+# Managed by Ansible (iac/ansible/roles/baseline)
+{% if inventory_hostname in groups['domain_controllers'] %}
+# DCs are the time source for the domain, so they sync upstream.
+pool 2.debian.pool.ntp.org iburst
+{% else %}
+# Member servers follow the DCs, keeping Kerberos clock skew near zero.
+{% for dc in dc_servers %}
+server {{ dc }} iburst
+{% endfor %}
+{% endif %}
+driftfile /var/lib/chrony/chrony.drift
+makestep 1 3
+rtcsync
